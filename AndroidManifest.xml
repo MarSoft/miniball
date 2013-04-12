@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="name.maryasin.miniball"
-    android:versionCode="1"
-    android:versionName="1.0" >
+	package="name.maryasin.miniball"
+	android:versionCode="1"
+	android:versionName="1.0" >
 
-    <uses-sdk
-        android:minSdkVersion="11"
-        android:targetSdkVersion="15" />
+	<uses-sdk
+		android:minSdkVersion="11"
+		android:targetSdkVersion="15" />
 
-    <application
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
-        android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
-        <activity
-            android:name="name.maryasin.miniball.DanceListActivity"
-            android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+	<application
+		android:allowBackup="true"
+		android:icon="@drawable/ic_launcher"
+		android:label="@string/app_name"
+		android:theme="@style/AppTheme" >
+		<activity
+			android:name="name.maryasin.miniball.DanceListActivity"
+			android:label="@string/app_name" >
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name="name.maryasin.miniball.DanceDetailActivity"
-            android:label="@string/title_dance_detail"
-            android:parentActivityName=".DanceListActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".DanceListActivity" />
-        </activity>
-    </application>
+				<category android:name="android.intent.category.LAUNCHER" />
+			</intent-filter>
+		</activity>
+		<activity
+			android:name="name.maryasin.miniball.DanceDetailActivity"
+			android:label="@string/title_dance_detail"
+			android:parentActivityName=".DanceListActivity" >
+			<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+				android:value=".DanceListActivity" />
+		</activity>
+	</application>
 
 </manifest>
