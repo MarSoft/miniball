@@ -23,47 +23,31 @@ import android.util.Log;
  * TODO: Replace all uses of this class before publishing your app.
  */
 public class DataManager {
+	/**
+	 * Path to root directory of database
+	 */
+	public static File rootPath = new File(
+			Environment.getExternalStorageDirectory(),
+			"MiniBall"); // TODO: configurable root path
 
-    /**
-     * An array of sample (dummy) items.
-     */
-//    public static List<Tag> TAGS = new ArrayList<Tag>();
+//	public static List<Dance> ITEMS = new ArrayList<Dance>();
 
-    /**
-     * A map of sample (dummy) items, by ID.
-     */
-//    public static Map<String, Tag> ITEM_MAP = new HashMap<String, Tag>();
+	/**
+	 * A map of sample (dummy) items, by ID.
+	 */
+	public static Map<String, Dance> danceMap = new HashMap<String, Dance>();
+    public static Set<String> allTags;
+    public static List<String> allTagsList;
 
-    static {
-        // Add 3 sample items.
-        addItem(new Tag("1", "Item 1"));
-        addItem(new Tag("2", "Item 2"));
-        addItem(new Tag("3", "Item 3"));
-    }
-
-    private static void addItem(Tag item) {
-//        TAGS.add(item);
-//        ITEM_MAP.put(item.id, item);
-    }
-    /////////////////////////////////
-    
-    public static File rootPath = new File(
-    		Environment.getExternalStorageDirectory(),
-    		"MiniBall"); // TODO: configurable root path
-
-    static {
-        try {
+	static {
+	    try {
 			loadDances();
 		} catch (IOException e) {
 			Log.e("DataManager", "Не удалось загрузить танцы!", e);
 		}
-    }
-    
-    public static Map<String, Dance> danceMap;
-    public static Set<String> allTags;
-    public static List<String> allTagsList;
+	}
+
     public static void loadDances() throws IOException {
-    	// TODO: загрузить танцы
     	if(!rootPath.isDirectory())
     		throw new IOException("Root path "+rootPath+" is not a directory!");
     	
@@ -87,7 +71,7 @@ public class DataManager {
     	Collections.sort(allTagsList);
     	Log.d("DataManager", "Танцы и теги загружены");
     }
-    
+
     private static Map<Query, List<Dance>> danceSearchHash = new HashMap<Query, List<Dance>>();
     public static List<Dance> findDances(Query q) {
     	if(danceSearchHash.containsKey(q)) // если по этому запросу уже есть ответ
@@ -100,23 +84,75 @@ public class DataManager {
     	danceSearchHash.put(q, ret); // запоминаем результат на будущее
     	return ret;
     }
-    
-    public static class Tag {
-        public String id;
-        public String title;
 
-        public Tag(String id, String title) {
-            this.id = id;
-            this.title = title;
-        }
-        
-        @Override
-        public String toString() {
-            return title;
-        }
+	/**
+	 * A dummy item representing a piece of content.
+	 */
+	public static class Dance implements Comparable<Dance> {
+		public String name;
+    	private Set<String> tags;
+
+		public Dance(String name) {
+			this.name = name;
+		}
+    	/** Необходимое дополнение к инициализации конструктором! */
+    	public void loadTags() throws IOException {
+    		// файл должен существовать - проверяли при загрузке списка танцев
+    		FileInputStream fin = new FileInputStream(new File(
+    				new File(rootPath, name), "_.tag"));
+    		try {
+        		BufferedReader r = new BufferedReader(new InputStreamReader(fin));
+        		try {
+					this.tags = new HashSet<String>();
+					String line;
+					while ((line = r.readLine()) != null)
+						this.tags.add(line); // TODO: проверять теги на валидность. Комменты?
+				} finally {
+					r.close();
+				}
+    		} finally {
+    			fin.close();
+    		}
+    	}
+    	/**
+    	 * Возвращает Set тегов танца. Проверяет, загружены ли уже теги.
+    	 * @throws IllegalStateException если теги не были загружены (т.е. танец не инициализирован как положено)
+    	 * @return
+    	 */
+    	public Set<String> getTags() {
+    		if(tags == null) {
+    			Log.e("DataManager.Dance", "Внимание: запрос к getTags до загрузки тегов");
+    			throw new IllegalStateException("Внимание: запрос к getTags до загрузки тегов");
+    		}
+    		return tags;
+    	}
+
+		@Override
+		public String toString() {
+			return name;
+		}
+    	/** сравниваем только имя */
+		@Override
+		public int compareTo(Dance another) {
+			return name.compareToIgnoreCase(another.name);
+		}
+	}
+    public static class Material {
+    	public String dance;
+    	public String name;
+    	
+    	public Material(String dance, String name) {
+    		this.dance = dance;
+    		this.name = name;
+    	}
+    	
+    	@Override
+    	public String toString() {
+    		return dance+": "+name;
+    	}
     }
-    
-    /**
+
+	/**
      * Запрос к списку танцев.
      * Пока представляет собой обёртку вокруг Set<String>.
      * @author mars
@@ -146,59 +182,6 @@ public class DataManager {
     		if(!(o instanceof Query))
     			return false;
     		return ((Query)o).tags.equals(tags);
-    	}
-    }
-    
-    public static class Dance implements Comparable<Dance> {
-    	public String name;
-    	private Set<String> tags;
-    	
-    	public Dance(String name) {
-    		this.name = name;
-    	}
-    	/** Необходимое дополнение к инициализации конструктором! */
-    	public void loadTags() throws IOException {
-    		// файл должен существовать - проверяли при загрузке списка танцев
-    		FileInputStream fin = new FileInputStream(new File(
-    				new File(rootPath, name), "_.tag"));
-    		try {
-        		BufferedReader r = new BufferedReader(new InputStreamReader(fin));
-        		try {
-					this.tags = new HashSet<String>();
-					String line;
-					while ((line = r.readLine()) != null)
-						this.tags.add(line); // TODO: проверять теги на валидность. Комменты?
-				} finally {
-					r.close();
-				}
-    		} finally {
-    			fin.close();
-    		}
-    	}
-    	
-    	@Override
-    	public String toString() {
-    		return name; // TODO: доп.информация (теги, например)
-    	}
-    	/** сравниваем только имя */
-		@Override
-		public int compareTo(Dance another) {
-			return name.compareToIgnoreCase(another.name);
-		}
-    }
-    
-    public static class Material {
-    	public String dance;
-    	public String name;
-    	
-    	public Material(String dance, String name) {
-    		this.dance = dance;
-    		this.name = name;
-    	}
-    	
-    	@Override
-    	public String toString() {
-    		return dance+": "+name;
     	}
     }
 }
