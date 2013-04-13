@@ -32,12 +32,12 @@ public class DataManager {
 
 //	public static List<Dance> ITEMS = new ArrayList<Dance>();
 
-	/**
-	 * A map of sample (dummy) items, by ID.
-	 */
-	public static Map<String, Dance> danceMap = new HashMap<String, Dance>();
-	public static Set<String> allAliases;
-	public static List<String> allAliasList;
+	/** Карта, соотносящая все Танцы с их именами */
+	public static Map<String, Dance> danceMap;
+	/** Карта, соотносящая имена не только с Танцами, но и с Псевдонимами */
+	public static Map<String, AliasOrDance> aliasMap;
+	/** Алфавитно отсортированный список всех танцев и псевдонимов */
+	public static List<AliasOrDance> allAliasList;
 
 	static {
 		try {
@@ -61,13 +61,17 @@ public class DataManager {
 			}
 
 		Log.d("DataManager", "Загружаем псевдонимы");
-		allAliases = new HashSet<String>();
+		aliasMap = new HashMap<String, AliasOrDance>();
+		Set<String> aliases = new HashSet<String>();
 		for(Dance d: danceMap.values()) {
 			d.loadAliases(); // отдельной операцией - для возможного отображения прогресса
-			allAliases.addAll(d.aliases);
+			aliasMap.put(d.getName(), d);
+			aliases.addAll(d.aliases);
 		}
-		allAliasList = new ArrayList<String>();
-		allAliasList.addAll(allAliases);
+		for(String a: aliases)
+			aliasMap.put(a, new AliasOrDance(a));
+		allAliasList = new ArrayList<AliasOrDance>();
+		allAliasList.addAll(aliasMap.values());
 		Collections.sort(allAliasList);
 		Log.d("DataManager", "Танцы и псевдонимы загружены");
 	}
