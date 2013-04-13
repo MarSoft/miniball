@@ -55,12 +55,12 @@ public class DataManager {
 		danceMap = new HashMap<String, Dance>();
 		for(File f: rootPath.listFiles())
 			if(f.isDirectory() && // рассматриваем только папки,
-					new File(f, "_.tag").exists()) { // в которых есть общие теги
+					new File(f, "_alias").exists()) { // в которых есть псевдонимы
 				Dance d = new Dance(f.getName());
 				danceMap.put(d.name, d);
 			}
 
-		Log.d("DataManager", "Загружаем теги");
+		Log.d("DataManager", "Загружаем псевдонимы");
 		allAliases = new HashSet<String>();
 		for(Dance d: danceMap.values()) {
 			d.loadAliases(); // отдельной операцией - для возможного отображения прогресса
@@ -69,7 +69,7 @@ public class DataManager {
 		allAliasList = new ArrayList<String>();
 		allAliasList.addAll(allAliases);
 		Collections.sort(allAliasList);
-		Log.d("DataManager", "Танцы и теги загружены");
+		Log.d("DataManager", "Танцы и псевдонимы загружены");
 	}
 
 	private static Map<Query, List<Dance>> danceSearchHash = new HashMap<Query, List<Dance>>();
@@ -106,6 +106,12 @@ public class DataManager {
 		@Override
 		public String toString() {
 			return name;
+		}
+	}
+	/** Этот класс представляет псевдоним того или иного танца */
+	public class Alias extends MainItem {
+		public Alias(String name) {
+			super(name);
 		}
 	}
 	/**
