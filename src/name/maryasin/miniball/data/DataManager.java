@@ -12,6 +12,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 import android.os.Environment;
 import android.util.Log;
 
@@ -45,8 +48,8 @@ public class DataManager {
 		
 		try {
 			Log.d("DataManager", "Загружаем танцы");
-			danceMap = new HashMap<String, Dance>();
-			aliasMap = new HashMap<String, AliasOrDance>();
+			danceMap = new TreeMap<String, Dance>(String.CASE_INSENSITIVE_ORDER);
+			aliasMap = new TreeMap<String, AliasOrDance>(String.CASE_INSENSITIVE_ORDER);
 			for(File f: rootPath.listFiles())
 				if(f.isDirectory() && // рассматриваем только папки,
 						new File(f, "_alias").exists()) { // в которых есть псевдонимы
@@ -187,7 +190,7 @@ public class DataManager {
 			try {
 				BufferedReader r = new BufferedReader(new InputStreamReader(fin));
 				try {
-					this.aliases = new HashSet<String>();
+					this.aliases = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 					String line;
 					while ((line = r.readLine()) != null)
 						this.aliases.add(line); // TODO: проверять псевдонимы на валидность. Комменты?
@@ -262,7 +265,7 @@ public class DataManager {
 		}
 		/** Конструирует запрос, добавляя новый псевдоним к псевдонимам другого запроса */
 		public Query(Query old, String alias) {
-			aliases = new HashSet<String>();
+			aliases = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 			aliases.addAll(old.aliases);
 			aliases.add(alias);
 		}
