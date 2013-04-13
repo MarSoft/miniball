@@ -51,29 +51,37 @@ public class DataManager {
 		if(!rootPath.isDirectory())
 			throw new IOException("Root path "+rootPath+" is not a directory!");
 		
-		Log.d("DataManager", "Загружаем танцы");
-		danceMap = new HashMap<String, Dance>();
-		for(File f: rootPath.listFiles())
-			if(f.isDirectory() && // рассматриваем только папки,
-					new File(f, "_alias").exists()) { // в которых есть псевдонимы
-				Dance d = new Dance(f.getName());
-				danceMap.put(d.name, d);
-			}
+		try {
+			Log.d("DataManager", "Загружаем танцы");
+			danceMap = new HashMap<String, Dance>();
+			aliasMap = new HashMap<String, AliasOrDance>();
+			for(File f: rootPath.listFiles())
+				if(f.isDirectory() && // рассматриваем только папки,
+						new File(f, "_alias").exists()) { // в которых есть псевдонимы
+					Dance d = new Dance(f.getName());
+					danceMap.put(d.name, d);
+				}
 
-		Log.d("DataManager", "Загружаем псевдонимы");
-		aliasMap = new HashMap<String, AliasOrDance>();
-		Set<String> aliases = new HashSet<String>();
-		for(Dance d: danceMap.values()) {
-			d.loadAliases(); // отдельной операцией - для возможного отображения прогресса
-			aliasMap.put(d.getName(), d);
-			aliases.addAll(d.aliases);
+			Log.d("DataManager", "Загружаем псевдонимы");
+			Set<String> aliases = new HashSet<String>();
+			for(Dance d: danceMap.values()) {
+				d.loadAliases(); // отдельной операцией - для возможного отображения прогресса
+				aliasMap.put(d.getName(), d);
+				aliases.addAll(d.aliases);
+			}
+			for(String a: aliases)
+				aliasMap.put(a, new AliasOrDance(a));
+			allAliasList = new ArrayList<AliasOrDance>();
+			allAliasList.addAll(aliasMap.values());
+			Collections.sort(allAliasList);
+			Log.d("DataManager", "Танцы и псевдонимы загружены");
+		} catch (IOException e) {
+			// заметаем следы, чтобы не было лишних exceptions
+			danceMap = Collections.emptyMap();
+			aliasMap = Collections.emptyMap();
+			allAliasList = Collections.emptyList();
+			throw e; // TODO надо поймать где-то и вывести сообщение об ошибке
 		}
-		for(String a: aliases)
-			aliasMap.put(a, new AliasOrDance(a));
-		allAliasList = new ArrayList<AliasOrDance>();
-		allAliasList.addAll(aliasMap.values());
-		Collections.sort(allAliasList);
-		Log.d("DataManager", "Танцы и псевдонимы загружены");
 	}
 
 	private static Map<Query, List<Dance>> danceSearchHash = new HashMap<Query, List<Dance>>();
@@ -91,19 +99,48 @@ public class DataManager {
 
 	/** Этот класс представляет псевдоним танца.
 		Субклассом его является собственно танец.
-		Использоваться данный класс должен только в общем перечне псевдонимов и танцев,
+		Использоваться данный класс должен только в общем перечне
+		псевдонимов и танцев,
 		в остальных случаях псевдоним представлен строкой.
 	 */
 	protected static class AliasOrDance implements Comparable<AliasOrDance> {
 		private String name;
+		/** Число ссылок. Для псевдонима изначально 0, для танца 1 (он сам). */
+		protected int refCount;
 		
 		public AliasOrDance(String name) {
 			this.name = name;
+			refCount = 0; // изначально псевдоним ни на что не ссылается
 		}
 		
 		/** Возвращает название данного элемента */
 		public String getName() {
 			return name;
+		}
+
+		/** Вызывается только при загрузке списка танцев и псевдонимов */
+		/*package-local*/ void addRef() {
+			refCount++;
+		}
+		/** Возвращает число танцев, использующих этот псевдоним */
+		public int getRefCount() {
+			return refCount;
+		}
+		/**
+		 * Возвращает все танцы, использующие этот псевдоним.
+		 */
+		public Set<Dance> getReferringDances() {
+			// TODO
+			// TODO: кэширование?
+			return null;
+		}
+		/** Возвращает танец (единственный), ссылающийся на этот псевдоним.
+		 * Если таких танцев несколько, вызывает IllegalStateError */
+		public Dance getReferringDance() {
+			if(refCount > 1)
+				throw new IllegalStateException("На псевдоним "+getName()+" слишком много сслыок: "+refCount);
+			// TODO
+			return null;
 		}
 		
 		@Override
@@ -126,6 +163,7 @@ public class DataManager {
 		/** После инициализации обязательно вызвать loadAliases() */
 		public Dance(String name) {
 			super(name);
+			refCount = 1; // любой танец ссылается сам на себя, как минимум
 		}
 		/** Необходимое дополнение к инициализации конструктором! */
 		public void loadAliases() throws IOException {
@@ -157,6 +195,16 @@ public class DataManager {
 				throw new IllegalStateException("Внимание: запрос к getAliases до загрузки псевдонимов");
 			}
 			return aliases;
+		}
+		
+		/**
+		 * Любой танец как псевдоним ссылается как минимум сам на себя.
+		 */
+		@Override
+		public Dance getReferringDance() {
+			if(getRefCount() > 1)
+				throw new IllegalStateException("На танец "+getName()+" слишком много ссылок: "+getRefCount());
+			return this;
 		}
 	}
 	/**
