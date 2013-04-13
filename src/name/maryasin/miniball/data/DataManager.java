@@ -12,7 +12,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import android.os.Environment;
 import android.util.Log;
 
@@ -36,8 +35,6 @@ public class DataManager {
 	public static Map<String, Dance> danceMap;
 	/** Карта, соотносящая имена не только с Танцами, но и с Псевдонимами */
 	public static Map<String, AliasOrDance> aliasMap;
-	/** Алфавитно отсортированный список всех танцев и псевдонимов */
-	public static List<AliasOrDance> allAliasList;
 
 	static {
 		try {
@@ -60,40 +57,63 @@ public class DataManager {
 						new File(f, "_alias").exists()) { // в которых есть псевдонимы
 					Dance d = new Dance(f.getName());
 					danceMap.put(d.name, d);
+					aliasMap.put(d.name, d);
 				}
 
 			Log.d("DataManager", "Загружаем псевдонимы");
 			Set<String> aliases = new HashSet<String>();
+			// Грузим псевдонимы для всех танцев, запоминаем их перечень
 			for(Dance d: danceMap.values()) {
 				d.loadAliases(); // отдельной операцией - для возможного отображения прогресса
 				aliasMap.put(d.getName(), d);
 				aliases.addAll(d.aliases);
 			}
+			// Создаём уникальные объекты для всех псевдонимов
 			for(String a: aliases)
 				aliasMap.put(a, new AliasOrDance(a));
-			allAliasList = new ArrayList<AliasOrDance>();
-			allAliasList.addAll(aliasMap.values());
-			Collections.sort(allAliasList);
+			// А теперь отдельным циклом расставляем refCount для всех объектов
+			for(Dance d: danceMap.values())
+				for(String a: d.getAliases())
+					aliasMap.get(a).addRef();
 			Log.d("DataManager", "Танцы и псевдонимы загружены");
 		} catch (IOException e) {
-			// заметаем следы, чтобы не было лишних exceptions
+			// заметаем следы, чтобы не было лишних exceptions при отображении чего попало
+			// TODO: может, лучше работать с тем, что удалось загрузить? Возможно, загружать всё что только удастся?
 			danceMap = Collections.emptyMap();
 			aliasMap = Collections.emptyMap();
-			allAliasList = Collections.emptyList();
 			throw e; // TODO надо поймать где-то и вывести сообщение об ошибке
 		}
 	}
 
-	private static Map<Query, List<Dance>> danceSearchHash = new HashMap<Query, List<Dance>>();
-	public static List<Dance> findDances(Query q) {
-		if(danceSearchHash.containsKey(q)) // если по этому запросу уже есть ответ
-			return danceSearchHash.get(q);
-		List<Dance> ret = new ArrayList<Dance>();
+	private static Map<Query, Set<Dance>> danceSearchCache = new HashMap<Query, Set<Dance>>();
+	/** Возвращает перечень танцев, соответствующих запросу */
+	public static Set<Dance> findDances(Query q) {
+		if(danceSearchCache.containsKey(q)) // если по этому запросу уже есть ответ
+			return danceSearchCache.get(q);
+		Set<Dance> ret = new HashSet<Dance>();
 		for(Dance d: danceMap.values())
 			if(q.match(d))
 				ret.add(d);
+		danceSearchCache.put(q, ret); // запоминаем результат на будущее
+		return ret;
+	}
+	private static Map<Query, List<AliasOrDance>> aliasSearchCache = new HashMap<Query, List<AliasOrDance>>();
+	/** Возвращает отсортированный список Танцев, соответствующих запросу,
+		состоящему из 0 или более имён псевдонимов,
+		и Псевдонимов, которые есть у этих танцев */
+	public static List<AliasOrDance> findAliases(Query q) {
+		if(aliasSearchCache.containsKey(q)) // если по этому запросу уже есть ответ
+			return aliasSearchCache.get(q);
+		Set<Dance> dset = findDances(q);
+		Set<AliasOrDance> aset = new HashSet<AliasOrDance>();
+		aset.addAll(dset); // сначала добавим танцы
+		for(Dance d: dset)
+			for(String a: d.getAliases())
+				aset.add(aliasMap.get(a)); // берём из map, чтобы сохранить refcount
+		List<AliasOrDance> ret = new ArrayList<AliasOrDance>();
+		ret.addAll(aset);
 		Collections.sort(ret);
-		danceSearchHash.put(q, ret); // запоминаем результат на будущее
+		aliasSearchCache.put(q, ret); // запоминаем результат на будущее
 		return ret;
 	}
 
