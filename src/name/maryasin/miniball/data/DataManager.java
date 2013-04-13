@@ -36,14 +36,9 @@ public class DataManager {
 	/** Карта, соотносящая имена не только с Танцами, но и с Псевдонимами */
 	public static Map<String, AliasOrDance> aliasMap;
 
-	static {
-		try {
-			initDanceList();
-		} catch (IOException e) {
-			Log.e("DataManager", "Не удалось загрузить танцы!", e);
-		}
+	public static boolean isDanceListInitialized() {
+		return danceMap != null && aliasMap != null;
 	}
-
 	public static void initDanceList() throws IOException {
 		if(!rootPath.isDirectory())
 			throw new IOException("Root path "+rootPath+" is not a directory!");
@@ -83,6 +78,9 @@ public class DataManager {
 	private static Map<Query, Set<Dance>> danceSearchCache = new HashMap<Query, Set<Dance>>();
 	/** Возвращает перечень танцев, соответствующих запросу */
 	public static Set<Dance> findDances(Query q) {
+		if(!isDanceListInitialized())
+			throw new IllegalStateException("DataManager не инициализирован");
+		
 		if(danceSearchCache.containsKey(q)) // если по этому запросу уже есть ответ
 			return danceSearchCache.get(q);
 		Set<Dance> ret = new HashSet<Dance>();

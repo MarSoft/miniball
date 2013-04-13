@@ -1,10 +1,12 @@
 package name.maryasin.miniball;
 
+import java.io.IOException;
 import java.util.List;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -21,10 +23,10 @@ import name.maryasin.miniball.data.DataManager;
  * interface.
  */
 public class DanceListFragment extends ListFragment {
-	/** Текущий запрос к списку танцев. Храним ради toString (TODO: в заголовок его) */
+	/** Текущий запрос к списку танцев (TODO: в заголовок его) */
 	private DataManager.Query query;
-	/** Список танцев, отображаемых в activity */
-	private List<DataManager.Dance> danceList;
+	/** Список танцев (и псевдонимов!), отображаемый в activity */
+	private List<DataManager.AliasOrDance> danceList;
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -77,9 +79,16 @@ public class DanceListFragment extends ListFragment {
 		super.onCreate(savedInstanceState);
 
 		// TODO: use filter
-		query = new DataManager.Query();
-		danceList = DataManager.findDances(query);
-		setListAdapter(new ArrayAdapter<DataManager.Dance>(getActivity(),
+		query = new DataManager.Query(); // пока создаём пустой запрос
+		if(!DataManager.isDanceListInitialized())
+			try {
+				DataManager.initDanceList();
+			} catch (IOException e) {
+				Log.e("DanceListFragment", "Ошибка инициализации DataManager", e);
+				return;
+			}
+		danceList = DataManager.findAliases(query);
+		setListAdapter(new ArrayAdapter<DataManager.AliasOrDance>(getActivity(),
 				android.R.layout.simple_list_item_activated_1,
 				android.R.id.text1, danceList));
 	}
