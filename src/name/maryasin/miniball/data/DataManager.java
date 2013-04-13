@@ -71,6 +71,9 @@ public class DataManager {
 						else
 							aliasMap.put(a, new AliasOrDance(a));
 			}
+			// закрываем списки
+			danceMap = Collections.unmodifiableMap(danceMap);
+			aliasMap = Collections.unmodifiableMap(aliasMap);
 			Log.d("DataManager", "Танцы и псевдонимы загружены");
 		} catch (IOException e) {
 			// заметаем следы, чтобы не было лишних exceptions при отображении чего попало
@@ -218,6 +221,9 @@ public class DataManager {
 			return aliases;
 		}
 		
+		public boolean areMaterialsLoaded() {
+			return materials != null;
+		}
 		/** Инициализация перечня материалов данного танца. */
 		public void initMaterials() throws IOException {
 			if(!danceRoot.isDirectory())
@@ -255,6 +261,12 @@ public class DataManager {
 				} else
 					throw new InternalError("DataManager.Dance.initMaterials: непонятный файл прошёл через фильтр");
 			}
+			
+			// закрываем, чтобы потом никто не поменял случайно
+			materials = Collections.unmodifiableMap(materials);
+		}
+		public Map<String, Material> getMaterials() {
+			return materials;
 		}
 		
 		/**
