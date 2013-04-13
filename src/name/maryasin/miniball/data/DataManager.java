@@ -56,8 +56,8 @@ public class DataManager {
 				if(f.isDirectory() && // рассматриваем только папки,
 						new File(f, "_alias").exists()) { // в которых есть псевдонимы
 					Dance d = new Dance(f.getName());
-					danceMap.put(d.name, d);
-					aliasMap.put(d.name, d);
+					danceMap.put(d.getName(), d);
+					aliasMap.put(d.getName(), d);
 				}
 
 			Log.d("DataManager", "Загружаем псевдонимы");
@@ -118,12 +118,12 @@ public class DataManager {
 		псевдонимов и танцев,
 		в остальных случаях псевдоним представлен строкой.
 	 */
-	protected static class AliasOrDance implements Comparable<AliasOrDance> {
+	public static class AliasOrDance implements Comparable<AliasOrDance> {
 		private String name;
 		/** Число ссылок. Для псевдонима изначально 0, для танца 1 (он сам). */
 		protected int refCount;
 		
-		public AliasOrDance(String name) {
+		/*package*/ AliasOrDance(String name) {
 			this.name = name;
 			refCount = 0; // изначально псевдоним ни на что не ссылается
 		}
@@ -172,19 +172,20 @@ public class DataManager {
 	 * Этот класс представляет один танец из базы данных
 	 */
 	public static class Dance extends AliasOrDance {
-		public String name;
+		private File danceRoot;
 		private Set<String> aliases;
 
 		/** После инициализации обязательно вызвать loadAliases() */
-		public Dance(String name) {
+		/*package*/ Dance(String name) {
 			super(name);
 			refCount = 1; // любой танец ссылается сам на себя, как минимум
+			danceRoot = new File(rootPath, name);
 		}
 		/** Необходимое дополнение к инициализации конструктором! */
 		public void loadAliases() throws IOException {
 			// файл должен существовать - проверяли при загрузке списка танцев
 			FileInputStream fin = new FileInputStream(new File(
-					new File(rootPath, name), "_alias"));
+					danceRoot, "_alias"));
 			try {
 				BufferedReader r = new BufferedReader(new InputStreamReader(fin));
 				try {

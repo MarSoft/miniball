@@ -56,7 +56,7 @@ public class DanceDetailFragment extends Fragment {
 		// Show the dance content as text in a TextView.
 		if (mDance != null) {
 			((TextView) rootView.findViewById(R.id.dance_detail))
-					.setText("Псевдонимы танца "+mDance.name+":\n"+mDance.getAliases());
+					.setText("Псевдонимы танца "+mDance.getName()+":\n"+mDance.getAliases());
 		}
 
 		return rootView;
