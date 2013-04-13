@@ -3,6 +3,7 @@ package name.maryasin.miniball.data;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
@@ -10,6 +11,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -61,7 +63,7 @@ public class DataManager {
 			Log.d("DataManager", "Загружаем псевдонимы");
 			// Грузим псевдонимы для всех танцев
 			for(Dance d: danceMap.values()) {
-				d.loadAliases(); // отдельной операцией - для возможного отображения прогресса
+				d.initAliases(); // отдельной операцией - для возможного отображения прогресса
 				for(String a: d.getAliases())
 					if(!a.equalsIgnoreCase(d.getName())) // игнорируем псевдонимы, одноимённые самому танцу
 						if(aliasMap.containsKey(a))
@@ -176,6 +178,7 @@ public class DataManager {
 	public static class Dance extends AliasOrDance {
 		private File danceRoot;
 		private Set<String> aliases;
+		private Map<String, Material> materials;
 
 		/** После инициализации обязательно вызвать loadAliases() */
 		/*package*/ Dance(String name) {
@@ -184,7 +187,7 @@ public class DataManager {
 			danceRoot = new File(rootPath, name);
 		}
 		/** Необходимое дополнение к инициализации конструктором! */
-		public void loadAliases() throws IOException {
+		public void initAliases() throws IOException {
 			// файл должен существовать - проверяли при загрузке списка танцев
 			FileInputStream fin = new FileInputStream(new File(
 					danceRoot, "_alias"));
@@ -215,6 +218,45 @@ public class DataManager {
 			return aliases;
 		}
 		
+		/** Инициализация перечня материалов данного танца. */
+		public void initMaterials() throws IOException {
+			if(!danceRoot.isDirectory())
+				throw new IOException("Dance path "+danceRoot+" is not a directory!");
+			
+			materials = new TreeMap<String, Material>(String.CASE_INSENSITIVE_ORDER);
+			for(File f: danceRoot.listFiles(new FilenameFilter() {
+				@Override
+				public boolean accept(File dir, String filename) {
+					filename = filename.toLowerCase(Locale.getDefault());
+					if(filename == "_alias") // игнорируем служебный файл
+						return false;
+					if(filename.endsWith(".mp3")) // TODO: другие типы
+							return true;
+					return false;
+				}
+			})) {
+				String mname = f.getName();
+				String lname = mname.toLowerCase(Locale.getDefault());
+				
+				mname = mname.substring(0, mname.lastIndexOf('.')).trim();
+				Material m;
+				if(materials.containsKey(mname))
+					m = materials.get(mname);
+				else
+					m = new Material(this, mname);
+				if(lname.endsWith(".mp3") || lname.endsWith(".ogg")) { // audio
+					if(m.hasAudio())
+						Log.w("DataManager.Dance", this+": несколько аудиофайлов к одному материалу: "
+								+ m.getAudioFile() + ", " + f);
+					else
+						m.audioFile = f;
+				} else if(lname.endsWith(".tag")) {
+					// ...
+				} else
+					throw new InternalError("DataManager.Dance.initMaterials: непонятный файл прошёл через фильтр");
+			}
+		}
+		
 		/**
 		 * Любой танец как псевдоним ссылается как минимум сам на себя.
 		 */
@@ -226,21 +268,40 @@ public class DataManager {
 		}
 	}
 	/**
-	 * Материал танца.
+	 * Материал танца. Пока что поддерживаются только mp3 файлы.
 	 * TODO: Может включать музыку, текст, html, видео и теги.
 	 */
 	public static class Material {
-		public String dance;
+		public Dance dance;
 		public String name;
+		/*package*/ File audioFile;
+		private Set<String> tags;
 		
-		public Material(String dance, String name) {
+		public Material(Dance dance, String name) {
 			this.dance = dance;
 			this.name = name;
+			tags = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+		}
+		
+		public boolean hasAudio() {
+			return audioFile != null;
+		}
+		public File getAudioFile() {
+			return audioFile;
+		}
+		
+		/*package*/ void addTag(String tag) {
+			tags.add(tag);
+		}
+		public Set<String> getTags() {
+			return Collections.unmodifiableSet(tags);
 		}
 		
 		@Override
 		public String toString() {
-			return dance+": "+name;
+			return dance+": "+name
+					+(hasAudio()?" [a]":"")
+					+"\n  Tags: "+tags;
 		}
 	}
 
