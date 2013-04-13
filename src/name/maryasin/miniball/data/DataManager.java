@@ -85,11 +85,15 @@ public class DataManager {
 		return ret;
 	}
 
-	/** Суперкласс для Танцев и Псевдонимов */
-	protected static abstract class MainItem implements Comparable<MainItem> {
+	/** Этот класс представляет псевдоним танца.
+		Субклассом его является собственно танец.
+		Использоваться данный класс должен только в общем перечне псевдонимов и танцев,
+		в остальных случаях псевдоним представлен строкой.
+	 */
+	protected static class AliasOrDance implements Comparable<AliasOrDance> {
 		private String name;
 		
-		public MainItem(String name) {
+		public AliasOrDance(String name) {
 			this.name = name;
 		}
 		
@@ -99,7 +103,7 @@ public class DataManager {
 		}
 		
 		@Override
-		public int compareTo(MainItem another) {
+		public int compareTo(AliasOrDance another) {
 			return name.compareToIgnoreCase(another.name);
 		}
 
@@ -108,16 +112,10 @@ public class DataManager {
 			return name;
 		}
 	}
-	/** Этот класс представляет псевдоним того или иного танца */
-	public class Alias extends MainItem {
-		public Alias(String name) {
-			super(name);
-		}
-	}
 	/**
 	 * Этот класс представляет один танец из базы данных
 	 */
-	public static class Dance extends MainItem {
+	public static class Dance extends AliasOrDance {
 		public String name;
 		private Set<String> aliases;
 
