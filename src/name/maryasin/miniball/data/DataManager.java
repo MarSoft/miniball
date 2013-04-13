@@ -63,10 +63,11 @@ public class DataManager {
 			for(Dance d: danceMap.values()) {
 				d.loadAliases(); // отдельной операцией - для возможного отображения прогресса
 				for(String a: d.getAliases())
-					if(aliasMap.containsKey(a)) // FIXME: стало чувствительно к регистру?!
-						aliasMap.get(a).addRef();
-					else
-						aliasMap.put(a, new AliasOrDance(a));
+					if(!a.equalsIgnoreCase(d.getName())) // игнорируем псевдонимы, одноимённые самому танцу
+						if(aliasMap.containsKey(a))
+							aliasMap.get(a).addRef();
+						else
+							aliasMap.put(a, new AliasOrDance(a));
 			}
 			Log.d("DataManager", "Танцы и псевдонимы загружены");
 		} catch (IOException e) {
