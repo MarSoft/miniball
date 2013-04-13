@@ -61,20 +61,15 @@ public class DataManager {
 				}
 
 			Log.d("DataManager", "Загружаем псевдонимы");
-			Set<String> aliases = new HashSet<String>();
-			// Грузим псевдонимы для всех танцев, запоминаем их перечень
+			// Грузим псевдонимы для всех танцев
 			for(Dance d: danceMap.values()) {
 				d.loadAliases(); // отдельной операцией - для возможного отображения прогресса
-				aliasMap.put(d.getName(), d);
-				aliases.addAll(d.aliases);
-			}
-			// Создаём уникальные объекты для всех псевдонимов
-			for(String a: aliases)
-				aliasMap.put(a, new AliasOrDance(a));
-			// А теперь отдельным циклом расставляем refCount для всех объектов
-			for(Dance d: danceMap.values())
 				for(String a: d.getAliases())
-					aliasMap.get(a).addRef();
+					if(aliasMap.containsKey(a)) // FIXME: стало чувствительно к регистру?!
+						aliasMap.get(a).addRef();
+					else
+						aliasMap.put(a, new AliasOrDance(a));
+			}
 			Log.d("DataManager", "Танцы и псевдонимы загружены");
 		} catch (IOException e) {
 			// заметаем следы, чтобы не было лишних exceptions при отображении чего попало
