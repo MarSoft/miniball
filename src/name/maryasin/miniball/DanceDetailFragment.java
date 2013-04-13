@@ -2,6 +2,7 @@ package name.maryasin.miniball;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,8 +43,11 @@ public class DanceDetailFragment extends Fragment {
 			// Load the dummy content specified by the fragment
 			// arguments. In a real-world scenario, use a Loader
 			// to load content from a content provider.
-			mDance = DataManager.danceMap.get(getArguments().getString(
-					ARG_DANCE_NAME));
+			String danceName = getArguments().getString(
+					ARG_DANCE_NAME);
+			mDance = DataManager.danceMap.get(danceName); // FIXME: если не инициализировано, создавать новый? (чтобы не требовалась загрузка, и чтобы не падать при неинициализированном менеджере)
+			if(mDance == null) // нет такого танца
+				Log.e("DanceDetailFragment", "Танец не найден: "+danceName);
 		}
 	}
 
@@ -56,7 +60,9 @@ public class DanceDetailFragment extends Fragment {
 		// Show the dance content as text in a TextView.
 		if (mDance != null) {
 			((TextView) rootView.findViewById(R.id.dance_detail))
-					.setText("Псевдонимы танца "+mDance.getName()+":\n"+mDance.getAliases());
+					.setText("Псевдонимы танца "+mDance.getName()+":\n"
+							+mDance.getAliases()
+							+"\nRefCount: "+mDance.getRefCount());
 		}
 
 		return rootView;
