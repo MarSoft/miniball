@@ -41,13 +41,13 @@ public class DataManager {
 
 	static {
 		try {
-			loadDances();
+			initDanceList();
 		} catch (IOException e) {
 			Log.e("DataManager", "Не удалось загрузить танцы!", e);
 		}
 	}
 
-	public static void loadDances() throws IOException {
+	public static void initDanceList() throws IOException {
 		if(!rootPath.isDirectory())
 			throw new IOException("Root path "+rootPath+" is not a directory!");
 		
@@ -138,8 +138,8 @@ public class DataManager {
 		}
 	}
 	/**
-	 * Материал танца. Может включать музыку, текст, html, видео и теги.
-	 * TODO
+	 * Материал танца.
+	 * TODO: Может включать музыку, текст, html, видео и теги.
 	 */
 	public static class Material {
 		public String dance;
