@@ -36,8 +36,8 @@ public class DataManager {
 	 * A map of sample (dummy) items, by ID.
 	 */
 	public static Map<String, Dance> danceMap = new HashMap<String, Dance>();
-	public static Set<String> allTags;
-	public static List<String> allTagsList;
+	public static Set<String> allAliases;
+	public static List<String> allAliasList;
 
 	static {
 		try {
@@ -61,14 +61,14 @@ public class DataManager {
 			}
 
 		Log.d("DataManager", "Загружаем теги");
-		allTags = new HashSet<String>();
+		allAliases = new HashSet<String>();
 		for(Dance d: danceMap.values()) {
-			d.loadTags(); // отдельной операцией - для возможного отображения прогресса
-			allTags.addAll(d.tags);
+			d.loadAliases(); // отдельной операцией - для возможного отображения прогресса
+			allAliases.addAll(d.aliases);
 		}
-		allTagsList = new ArrayList<String>();
-		allTagsList.addAll(allTags);
-		Collections.sort(allTagsList);
+		allAliasList = new ArrayList<String>();
+		allAliasList.addAll(allAliases);
+		Collections.sort(allAliasList);
 		Log.d("DataManager", "Танцы и теги загружены");
 	}
 
@@ -85,28 +85,52 @@ public class DataManager {
 		return ret;
 	}
 
-	/**
-	 * A dummy item representing a piece of content.
-	 */
-	public static class Dance implements Comparable<Dance> {
-		public String name;
-		private Set<String> tags;
-
-		public Dance(String name) {
+	/** Суперкласс для Танцев и Псевдонимов */
+	protected static abstract class MainItem implements Comparable<MainItem> {
+		private String name;
+		
+		public MainItem(String name) {
 			this.name = name;
 		}
+		
+		/** Возвращает название данного элемента */
+		public String getName() {
+			return name;
+		}
+		
+		@Override
+		public int compareTo(MainItem another) {
+			return name.compareToIgnoreCase(another.name);
+		}
+
+		@Override
+		public String toString() {
+			return name;
+		}
+	}
+	/**
+	 * Этот класс представляет один танец из базы данных
+	 */
+	public static class Dance extends MainItem {
+		public String name;
+		private Set<String> aliases;
+
+		/** После инициализации обязательно вызвать loadAliases() */
+		public Dance(String name) {
+			super(name);
+		}
 		/** Необходимое дополнение к инициализации конструктором! */
-		public void loadTags() throws IOException {
+		public void loadAliases() throws IOException {
 			// файл должен существовать - проверяли при загрузке списка танцев
 			FileInputStream fin = new FileInputStream(new File(
-					new File(rootPath, name), "_.tag"));
+					new File(rootPath, name), "_alias"));
 			try {
 				BufferedReader r = new BufferedReader(new InputStreamReader(fin));
 				try {
-					this.tags = new HashSet<String>();
+					this.aliases = new HashSet<String>();
 					String line;
 					while ((line = r.readLine()) != null)
-						this.tags.add(line); // TODO: проверять теги на валидность. Комменты?
+						this.aliases.add(line); // TODO: проверять псевдонимы на валидность. Комменты?
 				} finally {
 					r.close();
 				}
@@ -115,26 +139,16 @@ public class DataManager {
 			}
 		}
 		/**
-		 * Возвращает Set тегов танца. Проверяет, загружены ли уже теги.
-		 * @throws IllegalStateException если теги не были загружены (т.е. танец не инициализирован как положено)
+		 * Возвращает Set псевдонимов танца. Проверяет, загружены ли уже псевдонимы.
+		 * @throws IllegalStateException если псевдонимы не были загружены (т.е. танец не инициализирован как положено)
 		 * @return
 		 */
-		public Set<String> getTags() {
-			if(tags == null) {
-				Log.e("DataManager.Dance", "Внимание: запрос к getTags до загрузки тегов");
-				throw new IllegalStateException("Внимание: запрос к getTags до загрузки тегов");
+		public Set<String> getAliases() {
+			if(aliases == null) {
+				Log.e("DataManager.Dance", "Внимание: запрос к getAliases до загрузки псевдонимов");
+				throw new IllegalStateException("Внимание: запрос к getAliases до загрузки псевдонимов");
 			}
-			return tags;
-		}
-
-		@Override
-		public String toString() {
-			return name;
-		}
-		/** сравниваем только имя */
-		@Override
-		public int compareTo(Dance another) {
-			return name.compareToIgnoreCase(another.name);
+			return aliases;
 		}
 	}
 	/**
@@ -163,29 +177,36 @@ public class DataManager {
 	 *
 	 */
 	public static class Query {
-		Set<String> tags;
-		/** Конструирует запрос без тегов, которому соответствует любой танец */
+		Set<String> aliases;
+		/** Конструирует запрос без псевдонимов, которому соответствует любой танец */
 		public Query() {
-			this.tags = Collections.emptySet();
+			this.aliases = Collections.emptySet();
 		}
-		/** Конструирует запрос из одного тега */
-		public Query(String tag) {
-			this.tags = Collections.singleton(tag);
+		/** Конструирует запрос из одного псевдонима */
+		public Query(String alias) {
+			this.aliases = Collections.singleton(alias);
 		}
-		/** Конструирует запрос из нескольких тегов (AND) */
-		public Query(Set<String> tags) {
-			this.tags = tags;
+		/** Конструирует запрос из нескольких псевдонимов (AND) */
+		public Query(Set<String> aliases) {
+			this.aliases = aliases;
 		}
-		/** Сопоставляет теги танца с запросом.
+		/** Конструирует запрос, добавляя новый псевдоним к псевдонимам другого запроса */
+		public Query(Query old, String alias) {
+			aliases = new HashSet<String>();
+			aliases.addAll(old.aliases);
+			aliases.add(alias);
+		}
+		/** Сопоставляет псевдонимы танца с запросом.
 			Возвращает true, если танец соответствует запросу. */
 		public boolean match(Dance dance) {
-			return dance.tags.containsAll(tags);
+			return dance.aliases.containsAll(aliases);
 		}
 		
+		/** Сравнивает этот запрос с другим */
 		@Override public boolean equals(Object o) {
 			if(!(o instanceof Query))
 				return false;
-			return ((Query)o).tags.equals(tags);
+			return ((Query)o).aliases.equals(aliases);
 		}
 	}
 }
