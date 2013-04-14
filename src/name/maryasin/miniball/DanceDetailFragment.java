@@ -1,5 +1,7 @@
 package name.maryasin.miniball;
 
+import java.io.IOException;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -46,8 +48,17 @@ public class DanceDetailFragment extends Fragment {
 			String danceName = getArguments().getString(
 					ARG_DANCE_NAME);
 			mDance = DataManager.danceMap.get(danceName); // FIXME: если не инициализировано, создавать новый? (чтобы не требовалась загрузка, и чтобы не падать при неинициализированном менеджере)
-			if(mDance == null) // нет такого танца
+			if(mDance == null) { // нет такого танца
 				Log.e("DanceDetailFragment", "Танец не найден: "+danceName);
+				return;
+			}
+			if(!mDance.areMaterialsLoaded())
+				try {
+					mDance.initMaterials();
+				} catch (IOException e) {
+					Log.e("DanceDetailFragment",
+							"Не удалось загрузить материалы танца "+danceName, e);
+				}
 		}
 	}
 
@@ -62,7 +73,8 @@ public class DanceDetailFragment extends Fragment {
 			((TextView) rootView.findViewById(R.id.dance_detail))
 					.setText("Псевдонимы танца "+mDance.getName()+":\n"
 							+mDance.getAliases()
-							+"\nRefCount: "+mDance.getRefCount());
+							+"\nRefCount: "+mDance.getRefCount()
+							+"\nМатериалы: "+mDance.getMaterials().values());
 		}
 
 		return rootView;

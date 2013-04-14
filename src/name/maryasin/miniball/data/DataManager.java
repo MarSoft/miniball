@@ -248,8 +248,10 @@ public class DataManager {
 				Material m;
 				if(materials.containsKey(mname))
 					m = materials.get(mname);
-				else
+				else {
 					m = new Material(this, mname);
+					materials.put(mname, m);
+				}
 				if(lname.endsWith(".mp3") || lname.endsWith(".ogg")) { // audio
 					if(m.hasAudio())
 						Log.w("DataManager.Dance", this+": несколько аудиофайлов к одному материалу: "
