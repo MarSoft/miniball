@@ -221,7 +221,7 @@ public class DataManager {
 			return aliases;
 		}
 		
-		public boolean areMaterialsLoaded() {
+		public boolean areMaterialsInitialized() {
 			return materials != null;
 		}
 		/** Инициализация перечня материалов данного танца. */
@@ -268,7 +268,52 @@ public class DataManager {
 			materials = Collections.unmodifiableMap(materials);
 		}
 		public Map<String, Material> getMaterials() {
+			if(!areMaterialsInitialized())
+				throw new IllegalStateException("Dance.findMaterials: материалы не загружены для танца "+getName());
 			return materials;
+		}
+		
+		private class MaterialQuery {
+			Set<String> tags;
+			boolean needAudio;
+			public MaterialQuery(Set<String> tags, boolean needAudio) {
+				this.tags = tags;
+				this.needAudio = needAudio;
+			}
+			public boolean match(Material m) {
+				return m.tags.containsAll(tags) &&
+						(!needAudio || m.hasAudio());
+			}
+			@Override public boolean equals(Object o) {
+				if(!(o instanceof MaterialQuery)) return false;
+				return tags.equals(((MaterialQuery)o).tags) &&
+						needAudio == ((MaterialQuery)o).needAudio;
+			}
+		}
+		private Map<MaterialQuery, List<Material>> materialSearchCache =
+				new HashMap<MaterialQuery, List<Material>>();
+		/**
+		 * Возвращает отсортированный список материалов танца,
+		 * соответствующих указанным критериям.
+		 * @param tags Множество тегов, которые должны присутствовать у отобранных материалов. Если null, то теги не проверяются (т.е. считается пустым).
+		 * @param needAudio Если true, то будут отобраны только материалы, содержащие аудиозаписи.
+		 * TODO: другие типы данных
+		 * TODO: поиск по отсутствию тегов
+		 */
+		public List<Material> findMaterials(Set<String> tags, boolean needAudio) {
+			if(!areMaterialsInitialized())
+				throw new IllegalStateException("Dance.findMaterials: материалы не загружены для танца "+getName());
+			if(tags == null) tags = Collections.emptySet();
+			MaterialQuery q = new MaterialQuery(tags, needAudio);
+			if(materialSearchCache.containsKey(q))
+				return materialSearchCache.get(q);
+			List<Material> ret = new ArrayList<Material>();
+			for(Material m: materials.values())
+				if(q.match(m))
+					ret.add(m);
+			Collections.sort(ret);
+			materialSearchCache.put(q, ret);
+			return ret;
 		}
 		
 		/**
@@ -285,7 +330,7 @@ public class DataManager {
 	 * Материал танца. Пока что поддерживаются только mp3 файлы.
 	 * TODO: Может включать музыку, текст, html, видео и теги.
 	 */
-	public static class Material {
+	public static class Material implements Comparable<Material> {
 		public Dance dance;
 		public String name;
 		/*package*/ File audioFile;
@@ -316,6 +361,10 @@ public class DataManager {
 			return dance+": "+name
 					+(hasAudio()?" [a]":"")
 					+"\n  Tags: "+tags;
+		}
+		@Override
+		public int compareTo(Material other) {
+			return name.compareToIgnoreCase(other.name);
 		}
 	}
 
