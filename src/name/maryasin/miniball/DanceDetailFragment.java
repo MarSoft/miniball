@@ -1,17 +1,21 @@
 package name.maryasin.miniball;
 
 import java.io.IOException;
+import java.util.List;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
-
 import name.maryasin.miniball.R;
 import name.maryasin.miniball.data.DataManager;
+import name.maryasin.miniball.data.DataManager.Material;
 
 /**
  * A fragment representing a single Dance detail screen. This fragment is either
@@ -29,6 +33,7 @@ public class DanceDetailFragment extends Fragment {
 	 * The dance this fragment is presenting.
 	 */
 	private DataManager.Dance mDance;
+	private List<DataManager.Material> mMaterialList;
 
 	/**
 	 * Mandatory empty constructor for the fragment manager to instantiate the
@@ -52,7 +57,7 @@ public class DanceDetailFragment extends Fragment {
 				Log.e("DanceDetailFragment", "Танец не найден: "+danceName);
 				return;
 			}
-			if(!mDance.areMaterialsLoaded())
+			if(!mDance.areMaterialsInitialized())
 				try {
 					mDance.initMaterials();
 				} catch (IOException e) {
@@ -69,12 +74,31 @@ public class DanceDetailFragment extends Fragment {
 				container, false);
 
 		// Show the dance content as text in a TextView.
+		mMaterialList = mDance.findMaterials(null, true);
 		if (mDance != null) {
-			((TextView) rootView.findViewById(R.id.dance_detail))
-					.setText("Псевдонимы танца "+mDance.getName()+":\n"
-							+mDance.getAliases()
-							+"\nRefCount: "+mDance.getRefCount()
-							+"\nМатериалы: "+mDance.getMaterials().values());
+			((ListView) rootView.findViewById(R.id.material_audio_list))
+					.setAdapter(new ArrayAdapter<DataManager.Material>(
+							getActivity(),
+							android.R.layout.simple_list_item_1,
+							android.R.id.text1,
+							mMaterialList) {
+						@Override
+						public View getView(int position,
+								View convertView, ViewGroup parent) {
+							Material m = mMaterialList.get(position);
+							View row = convertView;
+							if(row == null) {
+								LayoutInflater inflater = (LayoutInflater)getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+								row = inflater.inflate(android.R.layout.simple_list_item_2, parent, false);
+							}
+							((TextView)row.findViewById(android.R.id.text1))
+									.setText(m.name);
+							if(m.getTags().size() > 0)
+								((TextView)row.findViewById(android.R.id.text2))
+										.setText(m.getTags().toString());
+							return row;
+						}
+					});
 		}
 
 		return rootView;
