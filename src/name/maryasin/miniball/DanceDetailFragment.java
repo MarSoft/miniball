@@ -80,6 +80,7 @@ public class DanceDetailFragment extends Fragment implements OnItemClickListener
 		// Show the dance content as text in a TextView.
 		mMaterialList = mDance.findMaterials(null, true);
 		if (mDance != null) {
+			getActivity().setTitle(mDance.getName()); // FIXME: а что будет в планшетном режиме?
 			((ListView) rootView.findViewById(R.id.material_audio_list))
 					.setAdapter(new ArrayAdapter<DataManager.Material>(
 							getActivity(),
