@@ -4,12 +4,16 @@ import java.io.IOException;
 import java.util.List;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -22,7 +26,7 @@ import name.maryasin.miniball.data.DataManager.Material;
  * contained in a {@link DanceListActivity} in two-pane mode (on tablets) or a
  * {@link DanceDetailActivity} on handsets.
  */
-public class DanceDetailFragment extends Fragment {
+public class DanceDetailFragment extends Fragment implements OnItemClickListener {
 	/**
 	 * The fragment argument representing the name of dance that this fragment
 	 * represents.
@@ -100,7 +104,17 @@ public class DanceDetailFragment extends Fragment {
 						}
 					});
 		}
+		((ListView) rootView.findViewById(R.id.material_audio_list))
+			.setOnItemClickListener(this);
 
 		return rootView;
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
+		Material m = mMaterialList.get(pos);
+		Intent i = new Intent(Intent.ACTION_VIEW);
+		i.setDataAndType(Uri.fromFile(m.getAudioFile()), "audio/*");
+		startActivity(i);
 	}
 }
