@@ -325,6 +325,13 @@ public class DataManager {
 				throw new IllegalStateException("На танец "+getName()+" слишком много ссылок: "+getRefCount());
 			return this;
 		}
+		
+		@Override
+		public String toString() {
+			return getName()+
+					(aliases==null?" *":
+						" "+getAliases().toString());
+		}
 	}
 	/**
 	 * Материал танца. Пока что поддерживаются только mp3 файлы.
