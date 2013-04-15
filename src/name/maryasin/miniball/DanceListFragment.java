@@ -1,6 +1,8 @@
 package name.maryasin.miniball;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
@@ -26,7 +28,7 @@ public class DanceListFragment extends ListFragment {
 	/** Текущий запрос к списку танцев (TODO: в заголовок его) */
 	private DataManager.Query query;
 	/** Список танцев (и псевдонимов!), отображаемый в activity */
-	private List<DataManager.AliasOrDance> danceList;
+	private List<DataManager.Dance> danceList;
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -87,8 +89,10 @@ public class DanceListFragment extends ListFragment {
 				Log.e("DanceListFragment", "Ошибка инициализации DataManager", e);
 				return;
 			}
-		danceList = DataManager.findAliases(query);
-		setListAdapter(new ArrayAdapter<DataManager.AliasOrDance>(getActivity(),
+		danceList = new ArrayList<DataManager.Dance>();
+		danceList.addAll(DataManager.findDances(query));
+		Collections.sort(danceList);
+		setListAdapter(new ArrayAdapter<DataManager.Dance>(getActivity(),
 				android.R.layout.simple_list_item_activated_1,
 				android.R.id.text1, danceList));
 	}
