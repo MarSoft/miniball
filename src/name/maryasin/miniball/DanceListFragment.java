@@ -27,7 +27,7 @@ public class DanceListFragment extends SherlockListFragment {
 	/** Текущий запрос к списку танцев (TODO: в заголовок его) */
 	private DataManager.Query query;
 	/** Список танцев (и псевдонимов!), отображаемый в activity */
-	private List<DataManager.AliasOrDance> danceList;
+	private List<DataManager.Alias> danceList;
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -89,7 +89,7 @@ public class DanceListFragment extends SherlockListFragment {
 				return;
 			}
 		danceList = DataManager.findAliases(query);
-		setListAdapter(new ArrayAdapter<DataManager.AliasOrDance>(getActivity(),
+		setListAdapter(new ArrayAdapter<DataManager.Alias>(getActivity(),
 				android.R.layout.simple_list_item_1, // был _activated, но он появился только в api 11
 				android.R.id.text1, danceList));
 	}

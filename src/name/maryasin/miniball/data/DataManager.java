@@ -39,7 +39,7 @@ public class DataManager {
 	/** Карта, соотносящая все Танцы с их именами */
 	public static Map<String, Dance> danceMap;
 	/** Карта, соотносящая имена не только с Танцами, но и с Псевдонимами */
-	public static Map<String, AliasOrDance> aliasMap;
+	public static Map<String, Alias> aliasMap;
 
 	public static boolean isDanceListInitialized() {
 		return danceMap != null && aliasMap != null;
@@ -51,7 +51,7 @@ public class DataManager {
 		try {
 			Log.d("DataManager", "Загружаем танцы");
 			danceMap = new TreeMap<String, Dance>(String.CASE_INSENSITIVE_ORDER);
-			aliasMap = new TreeMap<String, AliasOrDance>(String.CASE_INSENSITIVE_ORDER);
+			aliasMap = new TreeMap<String, Alias>(String.CASE_INSENSITIVE_ORDER);
 			for(File f: rootPath.listFiles())
 				if(f.isDirectory() && // рассматриваем только папки,
 						new File(f, "_alias").exists()) { // в которых есть псевдонимы
@@ -69,7 +69,7 @@ public class DataManager {
 						if(aliasMap.containsKey(a))
 							aliasMap.get(a).addRef();
 						else
-							aliasMap.put(a, new AliasOrDance(a));
+							aliasMap.put(a, new Alias(a));
 			}
 			// закрываем списки
 			danceMap = Collections.unmodifiableMap(danceMap);
@@ -99,38 +99,37 @@ public class DataManager {
 		danceSearchCache.put(q, ret); // запоминаем результат на будущее
 		return ret;
 	}
-	private static Map<Query, List<AliasOrDance>> aliasSearchCache = new HashMap<Query, List<AliasOrDance>>();
+	private static Map<Query, List<Alias>> aliasSearchCache = new HashMap<Query, List<Alias>>();
 	/** Возвращает отсортированный список Танцев, соответствующих запросу,
 		состоящему из 0 или более имён псевдонимов,
 		и Псевдонимов, которые есть у этих танцев */
-	public static List<AliasOrDance> findAliases(Query q) {
+	public static List<Alias> findAliases(Query q) {
 		if(aliasSearchCache.containsKey(q)) // если по этому запросу уже есть ответ
 			return aliasSearchCache.get(q);
 		Set<Dance> dset = findDances(q);
-		Set<AliasOrDance> aset = new HashSet<AliasOrDance>();
+		Set<Alias> aset = new HashSet<Alias>();
 		aset.addAll(dset); // сначала добавим танцы
 		for(Dance d: dset)
 			for(String a: d.getAliases())
 				aset.add(aliasMap.get(a)); // берём из map, чтобы сохранить refcount
-		List<AliasOrDance> ret = new ArrayList<AliasOrDance>();
+		List<Alias> ret = new ArrayList<Alias>();
 		ret.addAll(aset);
 		Collections.sort(ret);
 		aliasSearchCache.put(q, ret); // запоминаем результат на будущее
 		return ret;
 	}
 
-	/** Этот класс представляет псевдоним танца.
-		Субклассом его является собственно танец.
+	/** Этот класс представляет псевдоним танца или танец (который является его субклассом).
 		Использоваться данный класс должен только в общем перечне
 		псевдонимов и танцев,
 		в остальных случаях псевдоним представлен строкой.
 	 */
-	public static class AliasOrDance implements Comparable<AliasOrDance> {
+	public static class Alias implements Comparable<Alias> {
 		private String name;
 		/** Число ссылок. Для псевдонима изначально 0, для танца 1 (он сам). */
 		protected int refCount;
 		
-		/*package*/ AliasOrDance(String name) {
+		/*package*/ Alias(String name) {
 			this.name = name;
 			refCount = 0; // изначально псевдоним ни на что не ссылается
 		}
@@ -166,7 +165,7 @@ public class DataManager {
 		}
 		
 		@Override
-		public int compareTo(AliasOrDance another) {
+		public int compareTo(Alias another) {
 			return name.compareToIgnoreCase(another.name);
 		}
 
@@ -178,7 +177,7 @@ public class DataManager {
 	/**
 	 * Этот класс представляет один танец из базы данных
 	 */
-	public static class Dance extends AliasOrDance {
+	public static class Dance extends Alias {
 		private File danceRoot;
 		private Set<String> aliases;
 		private Map<String, Material> materials;
