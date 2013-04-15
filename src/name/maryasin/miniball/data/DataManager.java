@@ -406,6 +406,10 @@ public class DataManager {
 			return aliases.toArray(new String[0]);
 		}
 		public static Query deserialize(String[] src) {
+			if(src == null) {
+				Log.e("DataManager.Query", "src==null");
+				throw new NullPointerException("Ошибка: src не задан");
+			}
 			Set<String> s = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 			s.addAll(Arrays.asList(src));
 			return new Query(s);

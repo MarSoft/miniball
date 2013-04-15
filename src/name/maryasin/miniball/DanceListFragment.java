@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import name.maryasin.miniball.data.DataManager;
 import name.maryasin.miniball.data.DataManager.Query;
@@ -82,7 +83,7 @@ public class DanceListFragment extends ListFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		if(getArguments().containsKey(ARG_TAGS_FILTER)) {
+		if(getArguments() != null && getArguments().containsKey(ARG_TAGS_FILTER)) {
 			// Загружаем переданный перечень тегов
 			query = Query.deserialize(
 					getArguments().getStringArray(ARG_TAGS_FILTER));
@@ -93,6 +94,7 @@ public class DanceListFragment extends ListFragment {
 			try {
 				DataManager.initDanceList();
 			} catch (IOException e) {
+				Toast.makeText(getActivity(), "Не удалось инициализировать данные!", Toast.LENGTH_SHORT).show();
 				Log.e("DanceListFragment", "Ошибка инициализации DataManager", e);
 				return;
 			}

@@ -46,6 +46,16 @@ public class DanceListActivity extends FragmentActivity implements
 			((DanceListFragment) getSupportFragmentManager().findFragmentById(
 					R.id.dance_list)).setActivateOnItemClick(true);
 		}
+		
+		if(savedInstanceState == null) {
+			Bundle args = new Bundle();
+			args.putStringArray(DanceListFragment.ARG_TAGS_FILTER,
+					getIntent().getStringArrayExtra(DanceListFragment.ARG_TAGS_FILTER));
+			DanceListFragment fr = new DanceListFragment();
+			fr.setArguments(args);
+			getSupportFragmentManager().beginTransaction()
+					.add(R.id.dance_list, fr).commit();
+		}
 
 		// TODO: If exposing deep links into your app, handle intents here.
 	}
