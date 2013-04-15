@@ -3,11 +3,12 @@ package name.maryasin.miniball;
 import java.io.IOException;
 import java.util.List;
 
+import com.actionbarsherlock.app.SherlockFragment;
+
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,7 +27,7 @@ import name.maryasin.miniball.data.DataManager.Material;
  * contained in a {@link DanceListActivity} in two-pane mode (on tablets) or a
  * {@link DanceDetailActivity} on handsets.
  */
-public class DanceDetailFragment extends Fragment implements OnItemClickListener {
+public class DanceDetailFragment extends SherlockFragment implements OnItemClickListener {
 	/**
 	 * The fragment argument representing the name of dance that this fragment
 	 * represents.

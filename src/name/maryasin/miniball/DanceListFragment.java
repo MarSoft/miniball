@@ -3,9 +3,10 @@ package name.maryasin.miniball;
 import java.io.IOException;
 import java.util.List;
 
+import com.actionbarsherlock.app.SherlockListFragment;
+
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -22,7 +23,7 @@ import name.maryasin.miniball.data.DataManager;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class DanceListFragment extends ListFragment {
+public class DanceListFragment extends SherlockListFragment {
 	/** Текущий запрос к списку танцев (TODO: в заголовок его) */
 	private DataManager.Query query;
 	/** Список танцев (и псевдонимов!), отображаемый в activity */
