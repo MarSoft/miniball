@@ -12,6 +12,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import name.maryasin.miniball.data.DataManager;
+import name.maryasin.miniball.data.DataManager.Query;
 
 /**
  * A list fragment representing a list of Dances. This fragment also supports
@@ -23,6 +24,9 @@ import name.maryasin.miniball.data.DataManager;
  * interface.
  */
 public class DanceListFragment extends ListFragment {
+	/** Имя аргумента фрагмента, хранящего перечень задействованных тегов */
+	public static final String ARG_TAGS_FILTER = "tags_filter";
+	
 	/** Текущий запрос к списку танцев (TODO: в заголовок его) */
 	private DataManager.Query query;
 	/** Список танцев (и псевдонимов!), отображаемый в activity */
@@ -77,9 +81,14 @@ public class DanceListFragment extends ListFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		// TODO: use filter
-		query = new DataManager.Query(); // пока создаём пустой запрос
+		
+		if(getArguments().containsKey(ARG_TAGS_FILTER)) {
+			// Загружаем переданный перечень тегов
+			query = Query.deserialize(
+					getArguments().getStringArray(ARG_TAGS_FILTER));
+		} else { // если ничего не указано
+			query = new DataManager.Query(); // создаём пустой запрос
+		}
 		if(!DataManager.isDanceListInitialized())
 			try {
 				DataManager.initDanceList();
