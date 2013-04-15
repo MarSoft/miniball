@@ -90,7 +90,7 @@ public class DanceListFragment extends SherlockListFragment {
 			}
 		danceList = DataManager.findAliases(query);
 		setListAdapter(new ArrayAdapter<DataManager.AliasOrDance>(getActivity(),
-				android.R.layout.simple_list_item_activated_1,
+				android.R.layout.simple_list_item_1, // был _activated, но он появился только в api 11
 				android.R.id.text1, danceList));
 	}
 
