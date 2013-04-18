@@ -174,6 +174,17 @@ public class DataManager {
 		public int compareTo(Alias another) {
 			return name.compareToIgnoreCase(another.name);
 		}
+		@Override
+		public boolean equals(Object o) {
+			return (o instanceof Alias) &&
+					((Alias)o).name.equalsIgnoreCase(name);
+		}
+		/** Танцы/псевдонимы считаются одинаковыми, если совпадает имя. */
+		@Override
+		public int hashCode() {
+			return name.toLowerCase(Locale.getDefault()).hashCode();
+			// toLowerCase - во избежание косяков с регистром, когда два танца равны по compareTo, но имеют разные хэши
+		}
 
 		@Override
 		public String toString() {
@@ -194,7 +205,9 @@ public class DataManager {
 			refCount = 1; // любой танец ссылается сам на себя, как минимум
 			danceRoot = new File(rootPath, name);
 		}
-		/** Необходимое дополнение к инициализации конструктором! */
+		/** Необходимое дополнение к инициализации конструктором!
+		 * Загружает информацию о псевдонимах танца (набор строк),
+		 * сохраняет её в полях объекта. */
 		public void initAliases() throws IOException {
 			// файл должен существовать - проверяли при загрузке списка танцев
 			FileInputStream fin = new FileInputStream(new File(
