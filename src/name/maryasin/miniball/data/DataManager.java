@@ -27,6 +27,9 @@ import android.util.Log;
  * TODO: Replace all uses of this class before publishing your app.
  */
 public class DataManager {
+	/** Только для логов */
+	public static final String TAG = "DataManager";
+	
 	/**
 	 * Path to root directory of database
 	 */
@@ -49,7 +52,7 @@ public class DataManager {
 			throw new IOException("Указанный корневой каталог "+rootPath+" не является каталогом!");
 		
 		try {
-			Log.d("DataManager", "Загружаем танцы");
+			Log.d(TAG, "Загружаем танцы");
 			danceMap = new TreeMap<String, Dance>(String.CASE_INSENSITIVE_ORDER);
 			aliasMap = new TreeMap<String, Alias>(String.CASE_INSENSITIVE_ORDER);
 			for(File f: rootPath.listFiles())
@@ -60,7 +63,7 @@ public class DataManager {
 					aliasMap.put(d.getName(), d);
 				}
 
-			Log.d("DataManager", "Загружаем псевдонимы");
+			Log.d(TAG, "Загружаем псевдонимы");
 			// Грузим псевдонимы для всех танцев
 			for(Dance d: danceMap.values()) {
 				d.initAliases(); // отдельной операцией - для возможного отображения прогресса
@@ -74,7 +77,7 @@ public class DataManager {
 			// закрываем списки
 			danceMap = Collections.unmodifiableMap(danceMap);
 			aliasMap = Collections.unmodifiableMap(aliasMap);
-			Log.d("DataManager", "Танцы и псевдонимы загружены");
+			Log.d(TAG, "Танцы и псевдонимы загружены");
 		} catch (IOException e) {
 			// заметаем следы, чтобы не было лишних exceptions при отображении чего попало
 			// TODO: может, лучше работать с тем, что удалось загрузить? Возможно, загружать всё что только удастся?
@@ -222,7 +225,7 @@ public class DataManager {
 		 */
 		public Set<String> getAliases() {
 			if(aliases == null) {
-				Log.e("DataManager.Dance", "Внимание: запрос к getAliases до загрузки псевдонимов");
+				Log.e(TAG+".Dance", "Внимание: запрос к getAliases до загрузки псевдонимов");
 				throw new IllegalStateException("Внимание: запрос к getAliases до загрузки псевдонимов");
 			}
 			return aliases;
@@ -261,7 +264,7 @@ public class DataManager {
 				}
 				if(lname.endsWith(".mp3") || lname.endsWith(".ogg")) { // audio
 					if(m.hasAudio())
-						Log.w("DataManager.Dance", this+": несколько аудиофайлов к одному материалу: "
+						Log.w(TAG+".Dance", this+": несколько аудиофайлов к одному материалу: "
 								+ m.getAudioFile() + ", " + f);
 					else
 						m.audioFile = f;
