@@ -67,7 +67,7 @@ public class DataManager {
 				for(String a: d.getAliases())
 					if(!a.equalsIgnoreCase(d.getName())) // игнорируем псевдонимы, одноимённые самому танцу
 						if(aliasMap.containsKey(a))
-							aliasMap.get(a).addRef();
+							aliasMap.get(a).addRef(d);
 						else
 							aliasMap.put(a, new Alias(a));
 			}
@@ -139,8 +139,11 @@ public class DataManager {
 			return name;
 		}
 
-		/** Вызывается только при загрузке списка танцев и псевдонимов */
-		/*package-local*/ void addRef() {
+		/** Вызывается только при загрузке списка танцев и псевдонимов.
+		 * Добавляет информацию о том, что на это псевдоним ссылается какой-либо танец.
+		 * Танец пока не сохраняется, передаём для проформы.
+		 * TODO: Возможно, сохранять для оптимизации getReferringDances()? */
+		/*package-local*/ void addRef(Dance d) {
 			refCount++;
 		}
 		/** Возвращает число танцев, использующих этот псевдоним */
