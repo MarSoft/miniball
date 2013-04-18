@@ -196,10 +196,15 @@ public class DataManager {
 			try {
 				BufferedReader r = new BufferedReader(new InputStreamReader(fin));
 				try {
-					this.aliases = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+					aliases = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 					String line;
-					while ((line = r.readLine()) != null)
-						this.aliases.add(line); // TODO: проверять псевдонимы на валидность. Комменты?
+					while ((line = r.readLine()) != null) {
+						line = line.trim(); // на всякий случай убираем лишние пробелы на краях
+						if(line.length() > 0 && // игнорируем пустые строки
+								!line.startsWith("#") && // игнорируем комментарии
+								!line.equalsIgnoreCase(getName())) // игнорируем псевдоним, одноимённый танцу
+							aliases.add(line);
+					}
 				} finally {
 					r.close();
 				}
