@@ -18,6 +18,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 import name.maryasin.miniball.R;
 import name.maryasin.miniball.data.DataManager;
 import name.maryasin.miniball.data.DataManager.Material;
@@ -33,6 +34,9 @@ public class DanceDetailFragment extends SherlockFragment implements OnItemClick
 	 * represents.
 	 */
 	public static final String ARG_DANCE_NAME = "dance_name";
+	
+	/** Только для логов */
+	private static final String TAG = "DanceDetailFragment";
 
 	/**
 	 * The dance this fragment is presenting.
@@ -59,15 +63,15 @@ public class DanceDetailFragment extends SherlockFragment implements OnItemClick
 					ARG_DANCE_NAME);
 			mDance = DataManager.danceMap.get(danceName); // FIXME: если не инициализировано, создавать новый? (чтобы не требовалась загрузка, и чтобы не падать при неинициализированном менеджере)
 			if(mDance == null) { // нет такого танца
-				Log.e("DanceDetailFragment", "Танец не найден: "+danceName);
+				Log.e(TAG, "Танец не найден: "+danceName);
 				return;
 			}
 			if(!mDance.areMaterialsInitialized())
 				try {
 					mDance.initMaterials();
 				} catch (IOException e) {
-					Log.e("DanceDetailFragment",
-							"Не удалось загрузить материалы танца "+danceName, e);
+					Log.e(TAG, "Не удалось загрузить материалы танца "+danceName, e);
+					Toast.makeText(getSherlockActivity(), "Ошибка: "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
 				}
 		}
 	}

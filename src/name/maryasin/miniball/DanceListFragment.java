@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import name.maryasin.miniball.data.DataManager;
 
@@ -86,6 +87,7 @@ public class DanceListFragment extends SherlockListFragment {
 				DataManager.initDanceList();
 			} catch (IOException e) {
 				Log.e("DanceListFragment", "Ошибка инициализации DataManager", e);
+				Toast.makeText(getSherlockActivity(), "Ошибка: "+e.getMessage(), Toast.LENGTH_LONG).show();
 				return;
 			}
 		danceList = DataManager.findAliases(query);

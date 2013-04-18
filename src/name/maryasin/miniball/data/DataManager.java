@@ -46,7 +46,7 @@ public class DataManager {
 	}
 	public static void initDanceList() throws IOException {
 		if(!rootPath.isDirectory())
-			throw new IOException("Root path "+rootPath+" is not a directory!");
+			throw new IOException("Указанный корневой каталог "+rootPath+" не является каталогом!");
 		
 		try {
 			Log.d("DataManager", "Загружаем танцы");
@@ -80,7 +80,7 @@ public class DataManager {
 			// TODO: может, лучше работать с тем, что удалось загрузить? Возможно, загружать всё что только удастся?
 			danceMap = Collections.emptyMap();
 			aliasMap = Collections.emptyMap();
-			throw e; // TODO надо поймать где-то и вывести сообщение об ошибке
+			throw e;
 		}
 	}
 
