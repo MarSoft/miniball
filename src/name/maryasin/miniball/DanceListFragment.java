@@ -87,7 +87,8 @@ public class DanceListFragment extends SherlockListFragment {
 				DataManager.initDanceList();
 			} catch (IOException e) {
 				Log.e("DanceListFragment", "Ошибка инициализации DataManager", e);
-				Toast.makeText(getSherlockActivity(), "Ошибка: "+e.getMessage(), Toast.LENGTH_LONG).show();
+				Toast.makeText(getActivity(), "Ошибка: "+e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+				setListAdapter(new ArrayAdapter<String>(getActivity(), -1, -1, new String[0]));
 				return;
 			}
 		danceList = DataManager.findAliases(query);

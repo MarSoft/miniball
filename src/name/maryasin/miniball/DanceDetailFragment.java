@@ -71,7 +71,7 @@ public class DanceDetailFragment extends SherlockFragment implements OnItemClick
 					mDance.initMaterials();
 				} catch (IOException e) {
 					Log.e(TAG, "Не удалось загрузить материалы танца "+danceName, e);
-					Toast.makeText(getSherlockActivity(), "Ошибка: "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+					Toast.makeText(getActivity(), "Ошибка: "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
 				}
 		}
 	}
