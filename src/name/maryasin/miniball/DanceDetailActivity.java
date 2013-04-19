@@ -2,9 +2,11 @@ package name.maryasin.miniball;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
-import android.view.MenuItem;
+
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+import com.actionbarsherlock.view.MenuItem;
+
 import name.maryasin.miniball.R;
 
 /**
@@ -15,7 +17,7 @@ import name.maryasin.miniball.R;
  * This activity is mostly just a 'shell' activity containing nothing more than
  * a {@link DanceDetailFragment}.
  */
-public class DanceDetailActivity extends FragmentActivity {
+public class DanceDetailActivity extends SherlockFragmentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -23,7 +25,7 @@ public class DanceDetailActivity extends FragmentActivity {
 		setContentView(R.layout.activity_dance_detail);
 
 		// Show the Up button in the action bar.
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 		// savedInstanceState is non-null when there is fragment state
 		// saved from previous configurations of this activity

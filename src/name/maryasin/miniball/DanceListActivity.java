@@ -1,8 +1,9 @@
 package name.maryasin.miniball;
 
+import com.actionbarsherlock.app.SherlockFragmentActivity;
+
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import name.maryasin.miniball.R;
 
 /**
@@ -20,7 +21,7 @@ import name.maryasin.miniball.R;
  * This activity also implements the required
  * {@link DanceListFragment.Callbacks} interface to listen for item selections.
  */
-public class DanceListActivity extends FragmentActivity implements
+public class DanceListActivity extends SherlockFragmentActivity implements
 		DanceListFragment.Callbacks {
 
 	/**

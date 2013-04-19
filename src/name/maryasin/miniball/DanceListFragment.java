@@ -3,9 +3,10 @@ package name.maryasin.miniball;
 import java.io.IOException;
 import java.util.List;
 
+import com.actionbarsherlock.app.SherlockListFragment;
+
 import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -24,14 +25,14 @@ import name.maryasin.miniball.data.DataManager.Query;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class DanceListFragment extends ListFragment {
+public class DanceListFragment extends SherlockListFragment {
 	/** Имя аргумента фрагмента, хранящего перечень задействованных тегов */
 	public static final String ARG_TAGS_FILTER = "tags_filter";
 	
 	/** Текущий запрос к списку танцев (TODO: в заголовок его) */
 	private DataManager.Query query;
 	/** Список танцев (и псевдонимов!), отображаемый в activity */
-	private List<DataManager.AliasOrDance> danceList;
+	private List<DataManager.Alias> danceList;
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -96,11 +97,13 @@ public class DanceListFragment extends ListFragment {
 			} catch (IOException e) {
 				Toast.makeText(getActivity(), "Не удалось инициализировать данные!", Toast.LENGTH_SHORT).show();
 				Log.e("DanceListFragment", "Ошибка инициализации DataManager", e);
+				Toast.makeText(getActivity(), "Ошибка: "+e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+				setListAdapter(new ArrayAdapter<String>(getActivity(), -1, -1, new String[0]));
 				return;
 			}
 		danceList = DataManager.findAliases(query);
-		setListAdapter(new ArrayAdapter<DataManager.AliasOrDance>(getActivity(),
-				android.R.layout.simple_list_item_activated_1,
+		setListAdapter(new ArrayAdapter<DataManager.Alias>(getActivity(),
+				android.R.layout.simple_list_item_1, // был _activated, но он появился только в api 11
 				android.R.id.text1, danceList));
 	}
 

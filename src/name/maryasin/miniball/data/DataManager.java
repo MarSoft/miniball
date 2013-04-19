@@ -28,6 +28,9 @@ import android.util.Log;
  * TODO: Replace all uses of this class before publishing your app.
  */
 public class DataManager {
+	/** Только для логов */
+	public static final String TAG = "DataManager";
+	
 	/**
 	 * Path to root directory of database
 	 */
@@ -40,19 +43,19 @@ public class DataManager {
 	/** Карта, соотносящая все Танцы с их именами */
 	public static Map<String, Dance> danceMap;
 	/** Карта, соотносящая имена не только с Танцами, но и с Псевдонимами */
-	public static Map<String, AliasOrDance> aliasMap;
+	public static Map<String, Alias> aliasMap;
 
 	public static boolean isDanceListInitialized() {
 		return danceMap != null && aliasMap != null;
 	}
 	public static void initDanceList() throws IOException {
 		if(!rootPath.isDirectory())
-			throw new IOException("Root path "+rootPath+" is not a directory!");
+			throw new IOException("Указанный корневой каталог "+rootPath+" не является каталогом!");
 		
 		try {
-			Log.d("DataManager", "Загружаем танцы");
+			Log.d(TAG, "Загружаем танцы");
 			danceMap = new TreeMap<String, Dance>(String.CASE_INSENSITIVE_ORDER);
-			aliasMap = new TreeMap<String, AliasOrDance>(String.CASE_INSENSITIVE_ORDER);
+			aliasMap = new TreeMap<String, Alias>(String.CASE_INSENSITIVE_ORDER);
 			for(File f: rootPath.listFiles())
 				if(f.isDirectory() && // рассматриваем только папки,
 						new File(f, "_alias").exists()) { // в которых есть псевдонимы
@@ -61,27 +64,27 @@ public class DataManager {
 					aliasMap.put(d.getName(), d);
 				}
 
-			Log.d("DataManager", "Загружаем псевдонимы");
+			Log.d(TAG, "Загружаем псевдонимы");
 			// Грузим псевдонимы для всех танцев
 			for(Dance d: danceMap.values()) {
 				d.initAliases(); // отдельной операцией - для возможного отображения прогресса
 				for(String a: d.getAliases())
 					if(!a.equalsIgnoreCase(d.getName())) // игнорируем псевдонимы, одноимённые самому танцу
 						if(aliasMap.containsKey(a))
-							aliasMap.get(a).addRef();
+							aliasMap.get(a).addRef(d);
 						else
-							aliasMap.put(a, new AliasOrDance(a));
+							aliasMap.put(a, new Alias(a));
 			}
 			// закрываем списки
 			danceMap = Collections.unmodifiableMap(danceMap);
 			aliasMap = Collections.unmodifiableMap(aliasMap);
-			Log.d("DataManager", "Танцы и псевдонимы загружены");
+			Log.d(TAG, "Танцы и псевдонимы загружены");
 		} catch (IOException e) {
 			// заметаем следы, чтобы не было лишних exceptions при отображении чего попало
 			// TODO: может, лучше работать с тем, что удалось загрузить? Возможно, загружать всё что только удастся?
 			danceMap = Collections.emptyMap();
 			aliasMap = Collections.emptyMap();
-			throw e; // TODO надо поймать где-то и вывести сообщение об ошибке
+			throw e;
 		}
 	}
 
@@ -100,38 +103,37 @@ public class DataManager {
 		danceSearchCache.put(q, ret); // запоминаем результат на будущее
 		return ret;
 	}
-	private static Map<Query, List<AliasOrDance>> aliasSearchCache = new HashMap<Query, List<AliasOrDance>>();
+	private static Map<Query, List<Alias>> aliasSearchCache = new HashMap<Query, List<Alias>>();
 	/** Возвращает отсортированный список Танцев, соответствующих запросу,
 		состоящему из 0 или более имён псевдонимов,
 		и Псевдонимов, которые есть у этих танцев */
-	public static List<AliasOrDance> findAliases(Query q) {
+	public static List<Alias> findAliases(Query q) {
 		if(aliasSearchCache.containsKey(q)) // если по этому запросу уже есть ответ
 			return aliasSearchCache.get(q);
 		Set<Dance> dset = findDances(q);
-		Set<AliasOrDance> aset = new HashSet<AliasOrDance>();
+		Set<Alias> aset = new HashSet<Alias>();
 		aset.addAll(dset); // сначала добавим танцы
 		for(Dance d: dset)
 			for(String a: d.getAliases())
 				aset.add(aliasMap.get(a)); // берём из map, чтобы сохранить refcount
-		List<AliasOrDance> ret = new ArrayList<AliasOrDance>();
+		List<Alias> ret = new ArrayList<Alias>();
 		ret.addAll(aset);
 		Collections.sort(ret);
 		aliasSearchCache.put(q, ret); // запоминаем результат на будущее
 		return ret;
 	}
 
-	/** Этот класс представляет псевдоним танца.
-		Субклассом его является собственно танец.
+	/** Этот класс представляет псевдоним танца или танец (который является его субклассом).
 		Использоваться данный класс должен только в общем перечне
 		псевдонимов и танцев,
 		в остальных случаях псевдоним представлен строкой.
 	 */
-	public static class AliasOrDance implements Comparable<AliasOrDance> {
+	public static class Alias implements Comparable<Alias> {
 		private String name;
 		/** Число ссылок. Для псевдонима изначально 0, для танца 1 (он сам). */
 		protected int refCount;
 		
-		/*package*/ AliasOrDance(String name) {
+		/*package*/ Alias(String name) {
 			this.name = name;
 			refCount = 0; // изначально псевдоним ни на что не ссылается
 		}
@@ -141,8 +143,11 @@ public class DataManager {
 			return name;
 		}
 
-		/** Вызывается только при загрузке списка танцев и псевдонимов */
-		/*package-local*/ void addRef() {
+		/** Вызывается только при загрузке списка танцев и псевдонимов.
+		 * Добавляет информацию о том, что на это псевдоним ссылается какой-либо танец.
+		 * Танец пока не сохраняется, передаём для проформы.
+		 * TODO: Возможно, сохранять для оптимизации getReferringDances()? */
+		/*package-local*/ void addRef(Dance d) {
 			refCount++;
 		}
 		/** Возвращает число танцев, использующих этот псевдоним */
@@ -167,8 +172,19 @@ public class DataManager {
 		}
 		
 		@Override
-		public int compareTo(AliasOrDance another) {
+		public int compareTo(Alias another) {
 			return name.compareToIgnoreCase(another.name);
+		}
+		@Override
+		public boolean equals(Object o) {
+			return (o instanceof Alias) &&
+					((Alias)o).name.equalsIgnoreCase(name);
+		}
+		/** Танцы/псевдонимы считаются одинаковыми, если совпадает имя. */
+		@Override
+		public int hashCode() {
+			return name.toLowerCase(Locale.getDefault()).hashCode();
+			// toLowerCase - во избежание косяков с регистром, когда два танца равны по compareTo, но имеют разные хэши
 		}
 
 		@Override
@@ -179,7 +195,7 @@ public class DataManager {
 	/**
 	 * Этот класс представляет один танец из базы данных
 	 */
-	public static class Dance extends AliasOrDance {
+	public static class Dance extends Alias {
 		private File danceRoot;
 		private Set<String> aliases;
 		private Map<String, Material> materials;
@@ -190,7 +206,9 @@ public class DataManager {
 			refCount = 1; // любой танец ссылается сам на себя, как минимум
 			danceRoot = new File(rootPath, name);
 		}
-		/** Необходимое дополнение к инициализации конструктором! */
+		/** Необходимое дополнение к инициализации конструктором!
+		 * Загружает информацию о псевдонимах танца (набор строк),
+		 * сохраняет её в полях объекта. */
 		public void initAliases() throws IOException {
 			// файл должен существовать - проверяли при загрузке списка танцев
 			FileInputStream fin = new FileInputStream(new File(
@@ -198,10 +216,15 @@ public class DataManager {
 			try {
 				BufferedReader r = new BufferedReader(new InputStreamReader(fin));
 				try {
-					this.aliases = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+					aliases = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 					String line;
-					while ((line = r.readLine()) != null)
-						this.aliases.add(line); // TODO: проверять псевдонимы на валидность. Комменты?
+					while ((line = r.readLine()) != null) {
+						line = line.trim(); // на всякий случай убираем лишние пробелы на краях
+						if(line.length() > 0 && // игнорируем пустые строки
+								!line.startsWith("#") && // игнорируем комментарии
+								!line.equalsIgnoreCase(getName())) // игнорируем псевдоним, одноимённый танцу
+							aliases.add(line);
+					}
 				} finally {
 					r.close();
 				}
@@ -216,7 +239,7 @@ public class DataManager {
 		 */
 		public Set<String> getAliases() {
 			if(aliases == null) {
-				Log.e("DataManager.Dance", "Внимание: запрос к getAliases до загрузки псевдонимов");
+				Log.e(TAG+".Dance", "Внимание: запрос к getAliases до загрузки псевдонимов");
 				throw new IllegalStateException("Внимание: запрос к getAliases до загрузки псевдонимов");
 			}
 			return aliases;
@@ -255,7 +278,7 @@ public class DataManager {
 				}
 				if(lname.endsWith(".mp3") || lname.endsWith(".ogg")) { // audio
 					if(m.hasAudio())
-						Log.w("DataManager.Dance", this+": несколько аудиофайлов к одному материалу: "
+						Log.w(TAG+".Dance", this+": несколько аудиофайлов к одному материалу: "
 								+ m.getAudioFile() + ", " + f);
 					else
 						m.audioFile = f;
