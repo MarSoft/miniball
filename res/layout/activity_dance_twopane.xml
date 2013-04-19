@@ -5,12 +5,13 @@
 	android:layout_marginLeft="16dp"
 	android:layout_marginRight="16dp"
 	android:baselineAligned="false"
-	android:divider="?android:attr/dividerHorizontal"
 	android:orientation="horizontal"
 	android:showDividers="middle"
 	tools:context=".DanceListActivity" >
 
 	<!--
+	android:divider="?android:attr/dividerHorizontal"
+
 	This layout is a two-pane layout for the Dances
 	master/detail flow. See res/values-large/refs.xml and
 	res/values-sw600dp/refs.xml for an example of layout aliases
