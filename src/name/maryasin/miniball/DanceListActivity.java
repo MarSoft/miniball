@@ -63,16 +63,16 @@ public class DanceListActivity extends SherlockFragmentActivity implements
 
 	/**
 	 * Callback method from {@link DanceListFragment.Callbacks} indicating that
-	 * the item with the given ID was selected.
+	 * the dance with the given ID was selected.
 	 */
 	@Override
-	public void onItemSelected(String id) {
+	public void onDanceSelected(String name) {
 		if (mTwoPane) {
 			// In two-pane mode, show the detail view in this activity by
 			// adding or replacing the detail fragment using a
 			// fragment transaction.
 			Bundle arguments = new Bundle();
-			arguments.putString(DanceDetailFragment.ARG_DANCE_NAME, id);
+			arguments.putString(DanceDetailFragment.ARG_DANCE_NAME, name);
 			DanceDetailFragment fragment = new DanceDetailFragment();
 			fragment.setArguments(arguments);
 			getSupportFragmentManager().beginTransaction()
@@ -82,7 +82,7 @@ public class DanceListActivity extends SherlockFragmentActivity implements
 			// In single-pane mode, simply start the detail activity
 			// for the selected item ID.
 			Intent detailIntent = new Intent(this, DanceDetailActivity.class);
-			detailIntent.putExtra(DanceDetailFragment.ARG_DANCE_NAME, id);
+			detailIntent.putExtra(DanceDetailFragment.ARG_DANCE_NAME, name);
 			startActivity(detailIntent);
 		}
 	}

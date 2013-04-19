@@ -60,7 +60,7 @@ public class DanceListFragment extends SherlockListFragment {
 		/**
 		 * Callback for when an item has been selected.
 		 */
-		public void onItemSelected(String id);
+		public void onDanceSelected(String name);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class DanceListFragment extends SherlockListFragment {
 	 */
 	private static Callbacks sDummyCallbacks = new Callbacks() {
 		@Override
-		public void onItemSelected(String id) {
+		public void onDanceSelected(String id) {
 		}
 	};
 
@@ -150,7 +150,7 @@ public class DanceListFragment extends SherlockListFragment {
 
 		// Notify the active callbacks interface (the activity, if the
 		// fragment is attached to one) that an item has been selected.
-		mCallbacks.onItemSelected(danceList.get(position).getName());
+		mCallbacks.onDanceSelected(danceList.get(position).getName());
 	}
 
 	@Override
