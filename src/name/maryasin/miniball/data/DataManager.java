@@ -73,7 +73,7 @@ public class DataManager {
 						if(aliasMap.containsKey(a))
 							aliasMap.get(a).addRef(d);
 						else
-							aliasMap.put(a, new Alias(a));
+							aliasMap.put(a, new Alias(a, d));
 			}
 			// закрываем списки
 			danceMap = Collections.unmodifiableMap(danceMap);
@@ -136,6 +136,11 @@ public class DataManager {
 		/*package*/ Alias(String name) {
 			this.name = name;
 			refCount = 0; // изначально псевдоним ни на что не ссылается
+		}
+		/** Конструктор для псевдонима с возможностью указать один ref */
+		/*package*/ Alias(String name, Dance d) {
+			this(name);
+			addRef(d);
 		}
 		
 		/** Возвращает название данного элемента */
