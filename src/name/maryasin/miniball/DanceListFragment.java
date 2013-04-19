@@ -14,6 +14,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import name.maryasin.miniball.data.DataManager;
+import name.maryasin.miniball.data.DataManager.Alias;
 import name.maryasin.miniball.data.DataManager.Query;
 
 /**
@@ -148,9 +149,25 @@ public class DanceListFragment extends SherlockListFragment {
 			long id) {
 		super.onListItemClick(listView, view, position, id);
 
-		// Notify the active callbacks interface (the activity, if the
-		// fragment is attached to one) that an item has been selected.
-		mCallbacks.onDanceSelected(danceList.get(position).getName());
+		Alias aod = danceList.get(position);
+		if(aod.getRefCount() > 1) { // если ссылается не только на себя (FIXME: танец всё же по умолчанию показываем?)
+			Query q = new Query(query, aod.getName()); // создаём новый запрос, уточнённый
+			Bundle args = new Bundle();
+			args.putStringArray(ARG_TAGS_FILTER, q.serialize());
+			DanceListFragment n = new DanceListFragment();
+			n.setArguments(args);
+			if(this.getActivateOnItemClick())
+				n.setActivateOnItemClick(true);
+			getFragmentManager().beginTransaction()
+					.replace(R.id.dance_list, n)
+					.addToBackStack(null)
+					.commit();
+		} else {
+			// Notify the active callbacks interface (the activity, if the
+			// fragment is attached to one) that an item has been selected.
+			// getReferringDance: безопасно, т.к. refCount заведомо <= 1 (см. if).
+			mCallbacks.onDanceSelected(aod.getReferringDance().getName());
+		}
 	}
 
 	@Override
@@ -172,6 +189,9 @@ public class DanceListFragment extends SherlockListFragment {
 		getListView().setChoiceMode(
 				activateOnItemClick ? ListView.CHOICE_MODE_SINGLE
 						: ListView.CHOICE_MODE_NONE);
+	}
+	public boolean getActivateOnItemClick() {
+		return getListView().getChoiceMode() != ListView.CHOICE_MODE_NONE;
 	}
 
 	private void setActivatedPosition(int position) {

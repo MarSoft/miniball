@@ -132,6 +132,7 @@ public class DataManager {
 		private String name;
 		/** Число ссылок. Для псевдонима изначально 0, для танца 1 (он сам). */
 		protected int refCount;
+		private Dance ref; // TODO: пока поддерживает только один ref. А надо ли больше?
 		
 		/*package*/ Alias(String name) {
 			this.name = name;
@@ -154,6 +155,8 @@ public class DataManager {
 		 * TODO: Возможно, сохранять для оптимизации getReferringDances()? */
 		/*package-local*/ void addRef(Dance d) {
 			refCount++;
+			if(ref == null)
+				ref = d;
 		}
 		/** Возвращает число танцев, использующих этот псевдоним */
 		public int getRefCount() {
@@ -172,8 +175,7 @@ public class DataManager {
 		public Dance getReferringDance() {
 			if(refCount > 1)
 				throw new IllegalStateException("На псевдоним "+getName()+" слишком много сслыок: "+refCount);
-			// TODO
-			return null;
+			return ref;
 		}
 		
 		@Override
