@@ -84,7 +84,10 @@ public class DanceListFragment extends SherlockListFragment {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		
-		if(getArguments() != null && getArguments().containsKey(ARG_TAGS_FILTER)) {
+		String[] query_s = null;
+		if(getArguments() != null && getArguments().containsKey(ARG_TAGS_FILTER))
+			query_s = getArguments().getStringArray(ARG_TAGS_FILTER);
+		if(query_s != null) { // если указан И не null
 			// Загружаем переданный перечень тегов
 			query = Query.deserialize(
 					getArguments().getStringArray(ARG_TAGS_FILTER));

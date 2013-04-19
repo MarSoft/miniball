@@ -424,7 +424,8 @@ public class DataManager {
 			return dance.aliases.containsAll(aliases);
 		}
 		
-		/** Преобразует в массив строк, для сериализации */
+		/** Преобразует в массив строк, для сериализации.
+		 * (массив, а не одна строка - чтобы избежать проблем со спецсимволами) */
 		public String[] serialize() {
 			return aliases.toArray(new String[0]);
 		}
