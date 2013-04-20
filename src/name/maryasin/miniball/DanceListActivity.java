@@ -4,6 +4,8 @@ import com.actionbarsherlock.app.SherlockFragmentActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.util.Log;
 import name.maryasin.miniball.R;
 
 /**
@@ -23,6 +25,7 @@ import name.maryasin.miniball.R;
  */
 public class DanceListActivity extends SherlockFragmentActivity implements
 		DanceListFragment.Callbacks {
+	public static final String TAG = "DanceListActivity";
 
 	/**
 	 * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -34,7 +37,13 @@ public class DanceListActivity extends SherlockFragmentActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_dance_list);
-
+		
+		DanceListFragment danceListFr = new DanceListFragment();
+		Bundle args = new Bundle();
+		if(savedInstanceState == null && getIntent().hasExtra(DanceListFragment.ARG_TAGS_FILTER)) {
+			args.putStringArray(DanceListFragment.ARG_TAGS_FILTER,
+					getIntent().getStringArrayExtra(DanceListFragment.ARG_TAGS_FILTER));
+		}
 		if (findViewById(R.id.dance_detail_container) != null) {
 			// The detail container view will be present only in the
 			// large-screen layouts (res/values-large and
@@ -44,19 +53,13 @@ public class DanceListActivity extends SherlockFragmentActivity implements
 
 			// In two-pane mode, list items should be given the
 			// 'activated' state when touched.
-			((DanceListFragment) getSupportFragmentManager().findFragmentById(
-					R.id.dance_list)).setActivateOnItemClick(true);
+			// Так что передаём соответствующий аргумент фрагменту.
+			args.putBoolean(DanceListFragment.ARG_TWOPANE, true);
 		}
-		
-		if(savedInstanceState == null) {
-			Bundle args = new Bundle();
-			args.putStringArray(DanceListFragment.ARG_TAGS_FILTER,
-					getIntent().getStringArrayExtra(DanceListFragment.ARG_TAGS_FILTER));
-			DanceListFragment fr = new DanceListFragment();
-			fr.setArguments(args);
-			getSupportFragmentManager().beginTransaction()
-					.add(R.id.dance_list, fr).commit();
-		}
+		danceListFr.setArguments(args);
+		getSupportFragmentManager().beginTransaction()
+				.replace(R.id.dance_list_container, danceListFr)
+				.commit();
 
 		// TODO: If exposing deep links into your app, handle intents here.
 	}

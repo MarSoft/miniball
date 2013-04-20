@@ -10,8 +10,6 @@
 	tools:context=".DanceListActivity" >
 
 	<!--
-	android:divider="?android:attr/dividerHorizontal"
-
 	This layout is a two-pane layout for the Dances
 	master/detail flow. See res/values-large/refs.xml and
 	res/values-sw600dp/refs.xml for an example of layout aliases
@@ -22,13 +20,11 @@
 	http://developer.android.com/training/multiscreen/screensizes.html#TaskUseAliasFilters
 	-->
 
-	<fragment
-		android:id="@+id/dance_list"
-		android:name="name.maryasin.miniball.DanceListFragment"
+	<FrameLayout
+		android:id="@+id/dance_list_container"
 		android:layout_width="0dp"
 		android:layout_height="match_parent"
-		android:layout_weight="1"
-		tools:layout="@android:layout/list_content" />
+		android:layout_weight="1" />
 
 	<FrameLayout
 		android:id="@+id/dance_detail_container"

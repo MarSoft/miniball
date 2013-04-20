@@ -7,6 +7,7 @@ import com.actionbarsherlock.app.SherlockListFragment;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -29,6 +30,7 @@ import name.maryasin.miniball.data.DataManager.Query;
 public class DanceListFragment extends SherlockListFragment {
 	/** Имя аргумента фрагмента, хранящего перечень задействованных тегов */
 	public static final String ARG_TAGS_FILTER = "tags_filter";
+	public static final String ARG_TWOPANE = "two_pane";
 	
 	/** Текущий запрос к списку танцев (TODO: в заголовок его) */
 	private DataManager.Query query;
@@ -121,6 +123,8 @@ public class DanceListFragment extends SherlockListFragment {
 			setActivatedPosition(savedInstanceState
 					.getInt(STATE_ACTIVATED_POSITION));
 		}
+		if(getArguments() != null && getArguments().containsKey(ARG_TWOPANE))
+			this.setActivateOnItemClick(getArguments().getBoolean(ARG_TWOPANE));
 	}
 
 	@Override
@@ -154,12 +158,13 @@ public class DanceListFragment extends SherlockListFragment {
 			Query q = new Query(query, aod.getName()); // создаём новый запрос, уточнённый
 			Bundle args = new Bundle();
 			args.putStringArray(ARG_TAGS_FILTER, q.serialize());
+			if(this.getActivateOnItemClick())
+				args.putBoolean(ARG_TWOPANE, true);
 			DanceListFragment n = new DanceListFragment();
 			n.setArguments(args);
-			if(this.getActivateOnItemClick())
-				n.setActivateOnItemClick(true);
-			getFragmentManager().beginTransaction()
-					.replace(R.id.dance_list, n)
+			getActivity().getSupportFragmentManager().beginTransaction()
+					.replace(R.id.dance_list_container, n)
+					.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
 					.addToBackStack(null)
 					.commit();
 		} else {
@@ -179,6 +184,7 @@ public class DanceListFragment extends SherlockListFragment {
 		}
 	}
 
+	private boolean twopane;
 	/**
 	 * Turns on activate-on-click mode. When this mode is on, list items will be
 	 * given the 'activated' state when touched.
@@ -189,9 +195,10 @@ public class DanceListFragment extends SherlockListFragment {
 		getListView().setChoiceMode(
 				activateOnItemClick ? ListView.CHOICE_MODE_SINGLE
 						: ListView.CHOICE_MODE_NONE);
+		twopane = activateOnItemClick;
 	}
 	public boolean getActivateOnItemClick() {
-		return getListView().getChoiceMode() != ListView.CHOICE_MODE_NONE;
+		return twopane;
 	}
 
 	private void setActivatedPosition(int position) {
