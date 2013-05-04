@@ -4,18 +4,19 @@ import java.io.IOException;
 import java.util.List;
 
 import com.actionbarsherlock.app.SherlockListFragment;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import name.maryasin.miniball.data.DataManager;
 import name.maryasin.miniball.data.DataManager.Alias;
+import name.maryasin.miniball.data.DataManager.Dance;
 import name.maryasin.miniball.data.DataManager.Query;
 
 /**
@@ -27,7 +28,8 @@ import name.maryasin.miniball.data.DataManager.Query;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class DanceListFragment extends SherlockListFragment {
+public class DanceListFragment extends SherlockListFragment
+		implements android.widget.AdapterView.OnItemLongClickListener {
 	/** Имя аргумента фрагмента, хранящего перечень задействованных тегов */
 	public static final String ARG_TAGS_FILTER = "tags_filter";
 	public static final String ARG_TWOPANE = "two_pane";
@@ -118,6 +120,8 @@ public class DanceListFragment extends SherlockListFragment {
 		super.onViewCreated(view, savedInstanceState);
 
 		getListView().setFastScrollEnabled(true);
+		getListView().setOnItemLongClickListener(this);
+		
 		// Restore the previously serialized activated item position.
 		if (savedInstanceState != null
 				&& savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
@@ -169,10 +173,21 @@ public class DanceListFragment extends SherlockListFragment {
 					.addToBackStack(null)
 					.commit();
 		} else {
-			// Notify the active callbacks interface (the activity, if the
-			// fragment is attached to one) that an item has been selected.
+			// Сообщаем activity, в которой мы установлены, чтобы открыла
+			// соответствующие danceDetails.
 			// getReferringDance: безопасно, т.к. refCount заведомо <= 1 (см. if).
 			mCallbacks.onDanceSelected(aod.getReferringDance().getName());
+		}
+	}
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View view,
+			int position, long id) {
+		Alias aod = danceList.get(position);
+		if(aod instanceof Dance) { // танец -> открываем, не смотря на рефы
+			mCallbacks.onDanceSelected(aod.getName());
+			return true;
+		} else { // не обрабатываем
+			return false;
 		}
 	}
 
