@@ -207,7 +207,7 @@ public class DataManager {
 		private Set<String> aliases;
 		private Map<String, Material> materials;
 
-		/** После инициализации обязательно вызвать loadAliases() */
+		/** После инициализации обязательно вызвать initAliases() */
 		/*package*/ Dance(String name) {
 			super(name);
 			refCount = 1; // любой танец ссылается сам на себя, как минимум
