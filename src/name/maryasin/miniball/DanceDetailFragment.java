@@ -61,7 +61,7 @@ public class DanceDetailFragment extends SherlockFragment implements OnItemClick
 			// to load content from a content provider.
 			String danceName = getArguments().getString(
 					ARG_DANCE_NAME);
-			if(DataManager.isDanceListInitialized()) // FIXME: возможно, не грузить весь список, а создавать объект танца "с нуля". Это нужно реализовать на уровне DataManager.
+			if(!DataManager.isDanceListInitialized()) // FIXME: возможно, не грузить весь список, а создавать объект танца "с нуля". Это нужно реализовать на уровне DataManager.
 				try {
 					DataManager.initDanceList();
 				} catch (IOException e) {
