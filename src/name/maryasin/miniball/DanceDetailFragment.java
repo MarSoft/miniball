@@ -84,8 +84,8 @@ public class DanceDetailFragment extends SherlockFragment implements OnItemClick
 
 		// Show the dance content as text in a TextView.
 		if (mDance != null) {
-			mMaterialList = mDance.findMaterials(null, true);
 			getActivity().setTitle(mDance.getName()); // FIXME: а что будет в планшетном режиме?
+			mMaterialList = mDance.findMaterials(null, true);
 			((ListView) rootView.findViewById(R.id.material_audio_list))
 					.setAdapter(new ArrayAdapter<DataManager.Material>(
 							getActivity(),
@@ -109,6 +109,8 @@ public class DanceDetailFragment extends SherlockFragment implements OnItemClick
 							return row;
 						}
 					});
+		} else {
+			getActivity().setTitle("<танец не загружен!>");
 		}
 		((ListView) rootView.findViewById(R.id.material_audio_list))
 			.setOnItemClickListener(this);
