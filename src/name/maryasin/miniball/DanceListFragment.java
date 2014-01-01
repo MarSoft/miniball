@@ -3,17 +3,16 @@ package name.maryasin.miniball;
 import java.io.IOException;
 import java.util.List;
 
-import com.actionbarsherlock.app.SherlockListFragment;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
-
 import name.maryasin.miniball.data.DataManager;
 import name.maryasin.miniball.data.DataManager.Alias;
 import name.maryasin.miniball.data.DataManager.Dance;
@@ -28,7 +27,7 @@ import name.maryasin.miniball.data.DataManager.Query;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class DanceListFragment extends SherlockListFragment
+public class DanceListFragment extends ListFragment
 		implements android.widget.AdapterView.OnItemLongClickListener {
 	/** Имя аргумента фрагмента, хранящего перечень задействованных тегов */
 	public static final String ARG_TAGS_FILTER = "tags_filter";

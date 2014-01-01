@@ -4,10 +4,9 @@ import java.util.List;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceActivity;
 
-import com.actionbarsherlock.app.SherlockPreferenceActivity;
-
-public class ConfigActivity extends SherlockPreferenceActivity {
+public class ConfigActivity extends PreferenceActivity {
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
