@@ -23,6 +23,7 @@ import name.maryasin.miniball.R;
  */
 public class DanceListActivity extends SherlockFragmentActivity implements
 		DanceListFragment.Callbacks {
+	public static final String TAG = "DanceListActivity";
 
 	/**
 	 * Whether or not the activity is in two-pane mode, i.e. running on a tablet
@@ -34,7 +35,13 @@ public class DanceListActivity extends SherlockFragmentActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_dance_list);
-
+		
+		DanceListFragment danceListFr = new DanceListFragment();
+		Bundle args = new Bundle();
+		if(savedInstanceState == null && getIntent().hasExtra(DanceListFragment.ARG_TAGS_FILTER)) {
+			args.putStringArray(DanceListFragment.ARG_TAGS_FILTER,
+					getIntent().getStringArrayExtra(DanceListFragment.ARG_TAGS_FILTER));
+		}
 		if (findViewById(R.id.dance_detail_container) != null) {
 			// The detail container view will be present only in the
 			// large-screen layouts (res/values-large and
@@ -44,25 +51,29 @@ public class DanceListActivity extends SherlockFragmentActivity implements
 
 			// In two-pane mode, list items should be given the
 			// 'activated' state when touched.
-			((DanceListFragment) getSupportFragmentManager().findFragmentById(
-					R.id.dance_list)).setActivateOnItemClick(true);
+			// Так что передаём соответствующий аргумент фрагменту.
+			args.putBoolean(DanceListFragment.ARG_TWOPANE, true);
 		}
+		danceListFr.setArguments(args);
+		getSupportFragmentManager().beginTransaction()
+				.replace(R.id.dance_list_container, danceListFr)
+				.commit();
 
 		// TODO: If exposing deep links into your app, handle intents here.
 	}
 
 	/**
 	 * Callback method from {@link DanceListFragment.Callbacks} indicating that
-	 * the item with the given ID was selected.
+	 * the dance with the given ID was selected.
 	 */
 	@Override
-	public void onItemSelected(String id) {
+	public void onDanceSelected(String name) {
 		if (mTwoPane) {
 			// In two-pane mode, show the detail view in this activity by
 			// adding or replacing the detail fragment using a
 			// fragment transaction.
 			Bundle arguments = new Bundle();
-			arguments.putString(DanceDetailFragment.ARG_DANCE_NAME, id);
+			arguments.putString(DanceDetailFragment.ARG_DANCE_NAME, name);
 			DanceDetailFragment fragment = new DanceDetailFragment();
 			fragment.setArguments(arguments);
 			getSupportFragmentManager().beginTransaction()
@@ -72,7 +83,7 @@ public class DanceListActivity extends SherlockFragmentActivity implements
 			// In single-pane mode, simply start the detail activity
 			// for the selected item ID.
 			Intent detailIntent = new Intent(this, DanceDetailActivity.class);
-			detailIntent.putExtra(DanceDetailFragment.ARG_DANCE_NAME, id);
+			detailIntent.putExtra(DanceDetailFragment.ARG_DANCE_NAME, name);
 			startActivity(detailIntent);
 		}
 	}

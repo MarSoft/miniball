@@ -7,6 +7,7 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,7 +73,7 @@ public class DataManager {
 						if(aliasMap.containsKey(a))
 							aliasMap.get(a).addRef(d);
 						else
-							aliasMap.put(a, new Alias(a));
+							aliasMap.put(a, new Alias(a, d));
 			}
 			// закрываем списки
 			danceMap = Collections.unmodifiableMap(danceMap);
@@ -131,10 +132,16 @@ public class DataManager {
 		private String name;
 		/** Число ссылок. Для псевдонима изначально 0, для танца 1 (он сам). */
 		protected int refCount;
+		private Dance ref; // TODO: пока поддерживает только один ref. А надо ли больше?
 		
 		/*package*/ Alias(String name) {
 			this.name = name;
 			refCount = 0; // изначально псевдоним ни на что не ссылается
+		}
+		/** Конструктор для псевдонима с возможностью указать один ref */
+		/*package*/ Alias(String name, Dance d) {
+			this(name);
+			addRef(d);
 		}
 		
 		/** Возвращает название данного элемента */
@@ -148,6 +155,8 @@ public class DataManager {
 		 * TODO: Возможно, сохранять для оптимизации getReferringDances()? */
 		/*package-local*/ void addRef(Dance d) {
 			refCount++;
+			if(ref == null)
+				ref = d;
 		}
 		/** Возвращает число танцев, использующих этот псевдоним */
 		public int getRefCount() {
@@ -166,8 +175,7 @@ public class DataManager {
 		public Dance getReferringDance() {
 			if(refCount > 1)
 				throw new IllegalStateException("На псевдоним "+getName()+" слишком много сслыок: "+refCount);
-			// TODO
-			return null;
+			return ref;
 		}
 		
 		@Override
@@ -199,7 +207,7 @@ public class DataManager {
 		private Set<String> aliases;
 		private Map<String, Material> materials;
 
-		/** После инициализации обязательно вызвать loadAliases() */
+		/** После инициализации обязательно вызвать initAliases() */
 		/*package*/ Dance(String name) {
 			super(name);
 			refCount = 1; // любой танец ссылается сам на себя, как минимум
@@ -421,6 +429,21 @@ public class DataManager {
 			Возвращает true, если танец соответствует запросу. */
 		public boolean match(Dance dance) {
 			return dance.aliases.containsAll(aliases);
+		}
+		
+		/** Преобразует в массив строк, для сериализации.
+		 * (массив, а не одна строка - чтобы избежать проблем со спецсимволами) */
+		public String[] serialize() {
+			return aliases.toArray(new String[0]);
+		}
+		public static Query deserialize(String[] src) {
+			if(src == null) {
+				Log.e("DataManager.Query", "src==null");
+				throw new NullPointerException("Ошибка: src не задан");
+			}
+			Set<String> s = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+			s.addAll(Arrays.asList(src));
+			return new Query(s);
 		}
 		
 		/** Сравнивает этот запрос с другим */

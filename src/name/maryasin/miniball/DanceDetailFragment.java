@@ -61,9 +61,18 @@ public class DanceDetailFragment extends SherlockFragment implements OnItemClick
 			// to load content from a content provider.
 			String danceName = getArguments().getString(
 					ARG_DANCE_NAME);
-			mDance = DataManager.danceMap.get(danceName); // FIXME: если не инициализировано, создавать новый? (чтобы не требовалась загрузка, и чтобы не падать при неинициализированном менеджере)
+			if(!DataManager.isDanceListInitialized()) // FIXME: возможно, не грузить весь список, а создавать объект танца "с нуля". Это нужно реализовать на уровне DataManager.
+				try {
+					DataManager.initDanceList();
+				} catch (IOException e) {
+					Log.e("DanceListFragment", "Ошибка инициализации DataManager", e);
+					Toast.makeText(getActivity(), "Не удалось инициализировать данные!\nОшибка: "+e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+					return;
+				}
+			mDance = DataManager.danceMap.get(danceName);
 			if(mDance == null) { // нет такого танца
 				Log.e(TAG, "Танец не найден: "+danceName);
+				Toast.makeText(getActivity(), "Танец не найден: "+danceName, Toast.LENGTH_SHORT);
 				return;
 			}
 			if(!mDance.areMaterialsInitialized())

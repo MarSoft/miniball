@@ -4,16 +4,20 @@ import java.io.IOException;
 import java.util.List;
 
 import com.actionbarsherlock.app.SherlockListFragment;
-
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import name.maryasin.miniball.data.DataManager;
+import name.maryasin.miniball.data.DataManager.Alias;
+import name.maryasin.miniball.data.DataManager.Dance;
+import name.maryasin.miniball.data.DataManager.Query;
 
 /**
  * A list fragment representing a list of Dances. This fragment also supports
@@ -24,7 +28,12 @@ import name.maryasin.miniball.data.DataManager;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class DanceListFragment extends SherlockListFragment {
+public class DanceListFragment extends SherlockListFragment
+		implements android.widget.AdapterView.OnItemLongClickListener {
+	/** Имя аргумента фрагмента, хранящего перечень задействованных тегов */
+	public static final String ARG_TAGS_FILTER = "tags_filter";
+	public static final String ARG_TWOPANE = "two_pane";
+	
 	/** Текущий запрос к списку танцев (TODO: в заголовок его) */
 	private DataManager.Query query;
 	/** Список танцев (и псевдонимов!), отображаемый в activity */
@@ -56,7 +65,7 @@ public class DanceListFragment extends SherlockListFragment {
 		/**
 		 * Callback for when an item has been selected.
 		 */
-		public void onItemSelected(String id);
+		public void onDanceSelected(String name);
 	}
 
 	/**
@@ -65,7 +74,7 @@ public class DanceListFragment extends SherlockListFragment {
 	 */
 	private static Callbacks sDummyCallbacks = new Callbacks() {
 		@Override
-		public void onItemSelected(String id) {
+		public void onDanceSelected(String id) {
 		}
 	};
 
@@ -79,15 +88,23 @@ public class DanceListFragment extends SherlockListFragment {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
-		// TODO: use filter
-		query = new DataManager.Query(); // пока создаём пустой запрос
+		
+		String[] query_s = null;
+		if(getArguments() != null && getArguments().containsKey(ARG_TAGS_FILTER))
+			query_s = getArguments().getStringArray(ARG_TAGS_FILTER);
+		if(query_s != null) { // если указан И не null
+			// Загружаем переданный перечень тегов
+			query = Query.deserialize(
+					getArguments().getStringArray(ARG_TAGS_FILTER));
+		} else { // если ничего не указано
+			query = new DataManager.Query(); // создаём пустой запрос
+		}
 		if(!DataManager.isDanceListInitialized())
 			try {
 				DataManager.initDanceList();
 			} catch (IOException e) {
 				Log.e("DanceListFragment", "Ошибка инициализации DataManager", e);
-				Toast.makeText(getActivity(), "Ошибка: "+e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+				Toast.makeText(getActivity(), "Не удалось инициализировать данные!\nОшибка: "+e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 				setListAdapter(new ArrayAdapter<String>(getActivity(), -1, -1, new String[0]));
 				return;
 			}
@@ -101,12 +118,17 @@ public class DanceListFragment extends SherlockListFragment {
 	public void onViewCreated(View view, Bundle savedInstanceState) {
 		super.onViewCreated(view, savedInstanceState);
 
+		getListView().setFastScrollEnabled(true);
+		getListView().setOnItemLongClickListener(this);
+		
 		// Restore the previously serialized activated item position.
 		if (savedInstanceState != null
 				&& savedInstanceState.containsKey(STATE_ACTIVATED_POSITION)) {
 			setActivatedPosition(savedInstanceState
 					.getInt(STATE_ACTIVATED_POSITION));
 		}
+		if(getArguments() != null && getArguments().containsKey(ARG_TWOPANE))
+			this.setActivateOnItemClick(getArguments().getBoolean(ARG_TWOPANE));
 	}
 
 	@Override
@@ -135,9 +157,37 @@ public class DanceListFragment extends SherlockListFragment {
 			long id) {
 		super.onListItemClick(listView, view, position, id);
 
-		// Notify the active callbacks interface (the activity, if the
-		// fragment is attached to one) that an item has been selected.
-		mCallbacks.onItemSelected(danceList.get(position).getName());
+		Alias aod = danceList.get(position);
+		if(aod.getRefCount() > 1) { // если ссылается не только на себя (FIXME: танец всё же по умолчанию показываем?)
+			Query q = new Query(query, aod.getName()); // создаём новый запрос, уточнённый
+			Bundle args = new Bundle();
+			args.putStringArray(ARG_TAGS_FILTER, q.serialize());
+			if(this.getActivateOnItemClick())
+				args.putBoolean(ARG_TWOPANE, true);
+			DanceListFragment n = new DanceListFragment();
+			n.setArguments(args);
+			getActivity().getSupportFragmentManager().beginTransaction()
+					.replace(R.id.dance_list_container, n)
+					.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+					.addToBackStack(null)
+					.commit();
+		} else {
+			// Сообщаем activity, в которой мы установлены, чтобы открыла
+			// соответствующие danceDetails.
+			// getReferringDance: безопасно, т.к. refCount заведомо <= 1 (см. if).
+			mCallbacks.onDanceSelected(aod.getReferringDance().getName());
+		}
+	}
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View view,
+			int position, long id) {
+		Alias aod = danceList.get(position);
+		if(aod instanceof Dance) { // танец -> открываем, не смотря на рефы
+			mCallbacks.onDanceSelected(aod.getName());
+			return true;
+		} else { // не обрабатываем
+			return false;
+		}
 	}
 
 	@Override
@@ -149,6 +199,7 @@ public class DanceListFragment extends SherlockListFragment {
 		}
 	}
 
+	private boolean twopane;
 	/**
 	 * Turns on activate-on-click mode. When this mode is on, list items will be
 	 * given the 'activated' state when touched.
@@ -159,6 +210,10 @@ public class DanceListFragment extends SherlockListFragment {
 		getListView().setChoiceMode(
 				activateOnItemClick ? ListView.CHOICE_MODE_SINGLE
 						: ListView.CHOICE_MODE_NONE);
+		twopane = activateOnItemClick;
+	}
+	public boolean getActivateOnItemClick() {
+		return twopane;
 	}
 
 	private void setActivatedPosition(int position) {

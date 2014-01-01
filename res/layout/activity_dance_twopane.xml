@@ -5,7 +5,6 @@
 	android:layout_marginLeft="16dp"
 	android:layout_marginRight="16dp"
 	android:baselineAligned="false"
-	android:divider="?android:attr/dividerHorizontal"
 	android:orientation="horizontal"
 	android:showDividers="middle"
 	tools:context=".DanceListActivity" >
@@ -21,13 +20,11 @@
 	http://developer.android.com/training/multiscreen/screensizes.html#TaskUseAliasFilters
 	-->
 
-	<fragment
-		android:id="@+id/dance_list"
-		android:name="name.maryasin.miniball.DanceListFragment"
+	<FrameLayout
+		android:id="@+id/dance_list_container"
 		android:layout_width="0dp"
 		android:layout_height="match_parent"
-		android:layout_weight="1"
-		tools:layout="@android:layout/list_content" />
+		android:layout_weight="1" />
 
 	<FrameLayout
 		android:id="@+id/dance_detail_container"
