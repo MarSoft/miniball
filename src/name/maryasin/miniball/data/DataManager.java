@@ -38,6 +38,9 @@ public class DataManager {
 	public static void addDataChangedListener(DataChangedListener listener) {
 		listeners.add(listener);
 	}
+	public static void removeDataChangedListener(DataChangedListener listener) {
+		listeners.remove(listener);
+	}
 	private static void fireDataChanged() {
 		for(DataChangedListener l: listeners) {
 			l.onDataChanged();
