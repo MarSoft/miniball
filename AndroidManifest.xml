@@ -31,6 +31,9 @@
 				android:name="android.support.PARENT_ACTIVITY"
 				android:value=".DanceListActivity" />
 		</activity>
+		<activity
+			android:name="ConfigActivity"
+			android:label="@string/action_settings"></activity>
 	</application>
 
 </manifest>
