@@ -67,10 +67,10 @@ public class DataManager {
 	public static void initDanceList() throws IOException {
 		rootPath = new File(Settings.get().getRootPath());
 		
-		if(!rootPath.isDirectory())
-			throw new IOException("Указанный корневой каталог "+rootPath+" не является каталогом!");
-		
 		try {
+			if(!rootPath.isDirectory())
+				throw new IOException("Указанный корневой каталог "+rootPath+" не является каталогом!");
+			
 			Log.d(TAG, "Загружаем танцы");
 			danceMap = new TreeMap<String, Dance>(String.CASE_INSENSITIVE_ORDER);
 			aliasMap = new TreeMap<String, Alias>(String.CASE_INSENSITIVE_ORDER);
@@ -103,6 +103,7 @@ public class DataManager {
 			// TODO: может, лучше работать с тем, что удалось загрузить? Возможно, загружать всё что только удастся?
 			danceMap = Collections.emptyMap();
 			aliasMap = Collections.emptyMap();
+			fireDataChanged(); // it is a change too...
 			throw e;
 		}
 	}

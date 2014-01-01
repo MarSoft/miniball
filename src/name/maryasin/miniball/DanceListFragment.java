@@ -1,6 +1,7 @@
 package name.maryasin.miniball;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import name.maryasin.miniball.data.DataManager;
@@ -89,7 +90,7 @@ public class DanceListFragment extends ListFragment
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		DataManager.addDataChangedListener(this);
-		onDataChanged(); // load data
+		onDataChanged();
 	}
 	@Override
 	public void onDestroy() {
@@ -117,9 +118,11 @@ public class DanceListFragment extends ListFragment
 				setListAdapter(new ArrayAdapter<String>(getActivity(),
 						android.R.layout.simple_list_item_1,
 						android.R.id.text1, new String[0]));
-				return;
 			}
-		danceList = DataManager.findAliases(query);
+		if(DataManager.isDanceListInitialized())
+			danceList = DataManager.findAliases(query);
+		else
+			danceList = new ArrayList<DataManager.Alias>();
 		setListAdapter(new ArrayAdapter<DataManager.Alias>(getActivity(),
 				android.R.layout.simple_list_item_activated_1,
 				android.R.id.text1, danceList));
@@ -131,6 +134,7 @@ public class DanceListFragment extends ListFragment
 
 		getListView().setFastScrollEnabled(true);
 		getListView().setOnItemLongClickListener(this);
+		setEmptyText("No dances available!");
 		
 		// Restore the previously serialized activated item position.
 		if (savedInstanceState != null

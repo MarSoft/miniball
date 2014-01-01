@@ -44,7 +44,6 @@ public class Settings implements OnSharedPreferenceChangeListener {
 				Toast.makeText(context, "Не удалось инициализировать данные!\nОшибка: "+e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
 				return;
 			}
-			// TODO: update interface
 		}
 	}
 }
