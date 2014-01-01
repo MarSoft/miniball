@@ -4,6 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import name.maryasin.miniball.R;
 
 /**
@@ -63,6 +66,25 @@ public class DanceListActivity extends FragmentActivity implements
 				.commit();
 
 		// TODO: If exposing deep links into your app, handle intents here.
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Populate action bar with xml-defined items
+		getMenuInflater().inflate(R.menu.main_activity_actions, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar items
+		switch(item.getItemId()) {
+		case R.id.action_settings:
+			Intent settingsIntent = new Intent(this, ConfigActivity.class);
+			startActivity(settingsIntent);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	/**
