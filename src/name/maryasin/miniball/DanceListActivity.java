@@ -1,10 +1,12 @@
 package name.maryasin.miniball;
 
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-
+import name.maryasin.miniball.data.Settings;
 import android.content.Intent;
 import android.os.Bundle;
-import name.maryasin.miniball.R;
+import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
+import android.view.Menu;
+import android.view.MenuItem;
 
 /**
  * An activity representing a list of Dances. This activity has different
@@ -21,7 +23,7 @@ import name.maryasin.miniball.R;
  * This activity also implements the required
  * {@link DanceListFragment.Callbacks} interface to listen for item selections.
  */
-public class DanceListActivity extends SherlockFragmentActivity implements
+public class DanceListActivity extends FragmentActivity implements
 		DanceListFragment.Callbacks {
 	public static final String TAG = "DanceListActivity";
 
@@ -35,6 +37,10 @@ public class DanceListActivity extends SherlockFragmentActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_dance_list);
+		
+		// Load default values if needed
+		PreferenceManager.setDefaultValues(this, R.xml.settings, false);
+		Settings.init(this);
 		
 		DanceListFragment danceListFr = new DanceListFragment();
 		Bundle args = new Bundle();
@@ -60,6 +66,25 @@ public class DanceListActivity extends SherlockFragmentActivity implements
 				.commit();
 
 		// TODO: If exposing deep links into your app, handle intents here.
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// Populate action bar with xml-defined items
+		getMenuInflater().inflate(R.menu.main_activity_actions, menu);
+		return super.onCreateOptionsMenu(menu);
+	}
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// Handle action bar items
+		switch(item.getItemId()) {
+		case R.id.action_settings:
+			Intent settingsIntent = new Intent(this, ConfigActivity.class);
+			startActivity(settingsIntent);
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
 	}
 
 	/**

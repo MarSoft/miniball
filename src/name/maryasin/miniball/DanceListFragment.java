@@ -1,23 +1,23 @@
 package name.maryasin.miniball;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
-import com.actionbarsherlock.app.SherlockListFragment;
+import name.maryasin.miniball.data.DataManager;
+import name.maryasin.miniball.data.DataManager.Alias;
+import name.maryasin.miniball.data.DataManager.Dance;
+import name.maryasin.miniball.data.DataManager.Query;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ListFragment;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
-
-import name.maryasin.miniball.data.DataManager;
-import name.maryasin.miniball.data.DataManager.Alias;
-import name.maryasin.miniball.data.DataManager.Dance;
-import name.maryasin.miniball.data.DataManager.Query;
 
 /**
  * A list fragment representing a list of Dances. This fragment also supports
@@ -28,8 +28,9 @@ import name.maryasin.miniball.data.DataManager.Query;
  * Activities containing this fragment MUST implement the {@link Callbacks}
  * interface.
  */
-public class DanceListFragment extends SherlockListFragment
-		implements android.widget.AdapterView.OnItemLongClickListener {
+public class DanceListFragment extends ListFragment
+		implements android.widget.AdapterView.OnItemLongClickListener,
+		DataManager.DataChangedListener {
 	/** Имя аргумента фрагмента, хранящего перечень задействованных тегов */
 	public static final String ARG_TAGS_FILTER = "tags_filter";
 	public static final String ARG_TWOPANE = "two_pane";
@@ -88,7 +89,16 @@ public class DanceListFragment extends SherlockListFragment
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		DataManager.addDataChangedListener(this);
+		onDataChanged();
+	}
+	@Override
+	public void onDestroy() {
+		DataManager.removeDataChangedListener(this);
+		super.onDestroy();
+	}
+	@Override
+	public void onDataChanged() {
 		String[] query_s = null;
 		if(getArguments() != null && getArguments().containsKey(ARG_TAGS_FILTER))
 			query_s = getArguments().getStringArray(ARG_TAGS_FILTER);
@@ -105,12 +115,16 @@ public class DanceListFragment extends SherlockListFragment
 			} catch (IOException e) {
 				Log.e("DanceListFragment", "Ошибка инициализации DataManager", e);
 				Toast.makeText(getActivity(), "Не удалось инициализировать данные!\nОшибка: "+e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-				setListAdapter(new ArrayAdapter<String>(getActivity(), -1, -1, new String[0]));
-				return;
+				setListAdapter(new ArrayAdapter<String>(getActivity(),
+						android.R.layout.simple_list_item_1,
+						android.R.id.text1, new String[0]));
 			}
-		danceList = DataManager.findAliases(query);
+		if(DataManager.isDanceListInitialized())
+			danceList = DataManager.findAliases(query);
+		else
+			danceList = Collections.emptyList();
 		setListAdapter(new ArrayAdapter<DataManager.Alias>(getActivity(),
-				android.R.layout.simple_list_item_1, // был _activated, но он появился только в api 11
+				android.R.layout.simple_list_item_activated_1,
 				android.R.id.text1, danceList));
 	}
 
@@ -120,6 +134,7 @@ public class DanceListFragment extends SherlockListFragment
 
 		getListView().setFastScrollEnabled(true);
 		getListView().setOnItemLongClickListener(this);
+		setEmptyText("No dances available!");
 		
 		// Restore the previously serialized activated item position.
 		if (savedInstanceState != null

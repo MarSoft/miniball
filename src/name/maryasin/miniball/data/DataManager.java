@@ -18,7 +18,6 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import android.os.Environment;
 import android.util.Log;
 
 /**
@@ -28,17 +27,34 @@ import android.util.Log;
  * TODO: Replace all uses of this class before publishing your app.
  */
 public class DataManager {
-	/** Только для логов */
+	/** For logs only */
 	public static final String TAG = "DataManager";
+	
+	/** Called whenever DataManager decides that data changed and must be reloaded */
+	public interface DataChangedListener {
+		public void onDataChanged();
+	}
+	private static List<DataChangedListener> listeners = new ArrayList<DataChangedListener>();
+	public static void addDataChangedListener(DataChangedListener listener) {
+		listeners.add(listener);
+	}
+	public static void removeDataChangedListener(DataChangedListener listener) {
+		listeners.remove(listener);
+	}
+	private static void fireDataChanged() {
+		Log.d(TAG, "Firing onDataChanged");
+		for(DataChangedListener l: listeners) {
+			Log.d(TAG, "firing: "+l);
+			l.onDataChanged();
+		}
+	}
 	
 	/**
 	 * Path to root directory of database
 	 */
-	public static File rootPath = new File(
-			Environment.getExternalStorageDirectory(),
-			"MiniBall"); // TODO: configurable root path
+	public static File rootPath;
 
-//	public static List<Dance> ITEMS = new ArrayList<Dance>();
+	//	public static List<Dance> ITEMS = new ArrayList<Dance>();
 
 	/** Карта, соотносящая все Танцы с их именами */
 	public static Map<String, Dance> danceMap;
@@ -49,10 +65,12 @@ public class DataManager {
 		return danceMap != null && aliasMap != null;
 	}
 	public static void initDanceList() throws IOException {
-		if(!rootPath.isDirectory())
-			throw new IOException("Указанный корневой каталог "+rootPath+" не является каталогом!");
+		rootPath = new File(Settings.get().getRootPath());
 		
 		try {
+			if(!rootPath.isDirectory())
+				throw new IOException("Указанный корневой каталог "+rootPath+" не является каталогом!");
+			
 			Log.d(TAG, "Загружаем танцы");
 			danceMap = new TreeMap<String, Dance>(String.CASE_INSENSITIVE_ORDER);
 			aliasMap = new TreeMap<String, Alias>(String.CASE_INSENSITIVE_ORDER);
@@ -78,12 +96,14 @@ public class DataManager {
 			// закрываем списки
 			danceMap = Collections.unmodifiableMap(danceMap);
 			aliasMap = Collections.unmodifiableMap(aliasMap);
+			fireDataChanged();
 			Log.d(TAG, "Танцы и псевдонимы загружены");
 		} catch (IOException e) {
 			// заметаем следы, чтобы не было лишних exceptions при отображении чего попало
 			// TODO: может, лучше работать с тем, что удалось загрузить? Возможно, загружать всё что только удастся?
 			danceMap = Collections.emptyMap();
 			aliasMap = Collections.emptyMap();
+			fireDataChanged(); // it is a change too...
 			throw e;
 		}
 	}

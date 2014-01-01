@@ -2,12 +2,12 @@ package name.maryasin.miniball;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
-
-import com.actionbarsherlock.app.SherlockFragmentActivity;
-import com.actionbarsherlock.view.MenuItem;
-
+import android.view.MenuItem;
 import name.maryasin.miniball.R;
+import name.maryasin.miniball.data.Settings;
 
 /**
  * An activity representing a single Dance detail screen. This activity is only
@@ -17,15 +17,19 @@ import name.maryasin.miniball.R;
  * This activity is mostly just a 'shell' activity containing nothing more than
  * a {@link DanceDetailFragment}.
  */
-public class DanceDetailActivity extends SherlockFragmentActivity {
+public class DanceDetailActivity extends FragmentActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_dance_detail);
+		
+		// Load default values if needed
+		PreferenceManager.setDefaultValues(this, R.xml.settings, false);
+		Settings.init(this);
 
 		// Show the Up button in the action bar.
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getActionBar().setDisplayHomeAsUpEnabled(true);
 
 		// savedInstanceState is non-null when there is fragment state
 		// saved from previous configurations of this activity
