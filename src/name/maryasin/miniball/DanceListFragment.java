@@ -109,7 +109,7 @@ public class DanceListFragment extends ListFragment
 			}
 		danceList = DataManager.findAliases(query);
 		setListAdapter(new ArrayAdapter<DataManager.Alias>(getActivity(),
-				android.R.layout.simple_list_item_1, // был _activated, но он появился только в api 11
+				android.R.layout.simple_list_item_activated_1,
 				android.R.id.text1, danceList));
 	}
 
