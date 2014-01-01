@@ -3,6 +3,10 @@ package name.maryasin.miniball;
 import java.io.IOException;
 import java.util.List;
 
+import name.maryasin.miniball.data.DataManager;
+import name.maryasin.miniball.data.DataManager.Alias;
+import name.maryasin.miniball.data.DataManager.Dance;
+import name.maryasin.miniball.data.DataManager.Query;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -13,11 +17,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
-import name.maryasin.miniball.data.DataManager;
-import name.maryasin.miniball.data.DataManager.Alias;
-import name.maryasin.miniball.data.DataManager.Dance;
-import name.maryasin.miniball.data.DataManager.DataChangedListener;
-import name.maryasin.miniball.data.DataManager.Query;
 
 /**
  * A list fragment representing a list of Dances. This fragment also supports
@@ -115,7 +114,9 @@ public class DanceListFragment extends ListFragment
 			} catch (IOException e) {
 				Log.e("DanceListFragment", "Ошибка инициализации DataManager", e);
 				Toast.makeText(getActivity(), "Не удалось инициализировать данные!\nОшибка: "+e.getLocalizedMessage(), Toast.LENGTH_LONG).show();
-				setListAdapter(new ArrayAdapter<String>(getActivity(), -1, -1, new String[0]));
+				setListAdapter(new ArrayAdapter<String>(getActivity(),
+						android.R.layout.simple_list_item_1,
+						android.R.id.text1, new String[0]));
 				return;
 			}
 		danceList = DataManager.findAliases(query);
