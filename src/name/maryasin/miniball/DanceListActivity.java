@@ -8,6 +8,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import name.maryasin.miniball.R;
+import name.maryasin.miniball.data.Settings;
 
 /**
  * An activity representing a list of Dances. This activity has different
@@ -41,6 +42,7 @@ public class DanceListActivity extends FragmentActivity implements
 		
 		// Load default values if needed
 		PreferenceManager.setDefaultValues(this, R.xml.settings, false);
+		Settings.init(this);
 		
 		DanceListFragment danceListFr = new DanceListFragment();
 		Bundle args = new Bundle();

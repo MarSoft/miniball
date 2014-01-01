@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import name.maryasin.miniball.R;
+import name.maryasin.miniball.data.Settings;
 
 /**
  * An activity representing a single Dance detail screen. This activity is only
@@ -25,6 +26,7 @@ public class DanceDetailActivity extends FragmentActivity {
 		
 		// Load default values if needed
 		PreferenceManager.setDefaultValues(this, R.xml.settings, false);
+		Settings.init(this);
 
 		// Show the Up button in the action bar.
 		getActionBar().setDisplayHomeAsUpEnabled(true);
