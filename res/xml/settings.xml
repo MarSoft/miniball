@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    <EditTextPreference android:title="Root path" android:key="cfg_rootPath" android:summary="Path to database root directory" android:defaultValue="/sdcard/MiniBall"/>
-    
-
+    <EditTextPreference
+		android:title="@string/cfg_root_path"
+		android:key="cfg_rootPath"
+		android:defaultValue="/sdcard/MiniBall"/>
 </PreferenceScreen>
