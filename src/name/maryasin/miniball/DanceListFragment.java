@@ -16,6 +16,7 @@ import android.widget.Toast;
 import name.maryasin.miniball.data.DataManager;
 import name.maryasin.miniball.data.DataManager.Alias;
 import name.maryasin.miniball.data.DataManager.Dance;
+import name.maryasin.miniball.data.DataManager.DataChangedListener;
 import name.maryasin.miniball.data.DataManager.Query;
 
 /**
@@ -28,7 +29,8 @@ import name.maryasin.miniball.data.DataManager.Query;
  * interface.
  */
 public class DanceListFragment extends ListFragment
-		implements android.widget.AdapterView.OnItemLongClickListener {
+		implements android.widget.AdapterView.OnItemLongClickListener,
+		DataManager.DataChangedListener {
 	/** Имя аргумента фрагмента, хранящего перечень задействованных тегов */
 	public static final String ARG_TAGS_FILTER = "tags_filter";
 	public static final String ARG_TWOPANE = "two_pane";
@@ -87,7 +89,16 @@ public class DanceListFragment extends ListFragment
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+		DataManager.addDataChangedListener(this);
+		onDataChanged(); // load data
+	}
+	@Override
+	public void onDestroy() {
+		DataManager.removeDataChangedListener(this);
+		super.onDestroy();
+	}
+	@Override
+	public void onDataChanged() {
 		String[] query_s = null;
 		if(getArguments() != null && getArguments().containsKey(ARG_TAGS_FILTER))
 			query_s = getArguments().getStringArray(ARG_TAGS_FILTER);
