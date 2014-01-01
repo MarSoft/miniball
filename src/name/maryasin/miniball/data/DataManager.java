@@ -34,9 +34,9 @@ public class DataManager {
 	/**
 	 * Path to root directory of database
 	 */
-	public static File rootPath = new File(
+	public static File rootPath; /* = new File(
 			Environment.getExternalStorageDirectory(),
-			"MiniBall"); // TODO: configurable root path
+			"MiniBall"); */// TODO: configurable root path
 
 //	public static List<Dance> ITEMS = new ArrayList<Dance>();
 
@@ -49,6 +49,8 @@ public class DataManager {
 		return danceMap != null && aliasMap != null;
 	}
 	public static void initDanceList() throws IOException {
+		rootPath = new File(Settings.get().getRootPath());
+		
 		if(!rootPath.isDirectory())
 			throw new IOException("Указанный корневой каталог "+rootPath+" не является каталогом!");
 		
