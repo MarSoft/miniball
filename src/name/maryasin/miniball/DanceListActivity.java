@@ -2,6 +2,7 @@ package name.maryasin.miniball;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import name.maryasin.miniball.R;
 
@@ -34,6 +35,9 @@ public class DanceListActivity extends FragmentActivity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_dance_list);
+		
+		// Load default values if needed
+		PreferenceManager.setDefaultValues(this, R.xml.settings, false);
 		
 		DanceListFragment danceListFr = new DanceListFragment();
 		Bundle args = new Bundle();
