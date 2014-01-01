@@ -1,7 +1,7 @@
 package name.maryasin.miniball;
 
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import name.maryasin.miniball.data.DataManager;
@@ -122,7 +122,7 @@ public class DanceListFragment extends ListFragment
 		if(DataManager.isDanceListInitialized())
 			danceList = DataManager.findAliases(query);
 		else
-			danceList = new ArrayList<DataManager.Alias>();
+			danceList = Collections.emptyList();
 		setListAdapter(new ArrayAdapter<DataManager.Alias>(getActivity(),
 				android.R.layout.simple_list_item_activated_1,
 				android.R.id.text1, danceList));
