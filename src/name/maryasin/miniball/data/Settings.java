@@ -27,6 +27,7 @@ public class Settings implements OnSharedPreferenceChangeListener {
 	private Settings(Context context) {
 		this.context = context;
 		this.sharedPrefs = PreferenceManager.getDefaultSharedPreferences(context);
+		sharedPrefs.registerOnSharedPreferenceChangeListener(this);
 	}
 	
 	public String getRootPath() {
