@@ -42,7 +42,9 @@ public class DataManager {
 		listeners.remove(listener);
 	}
 	private static void fireDataChanged() {
+		Log.d(TAG, "Firing onDataChanged");
 		for(DataChangedListener l: listeners) {
+			Log.d(TAG, "firing: "+l);
 			l.onDataChanged();
 		}
 	}
