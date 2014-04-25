@@ -4,4 +4,6 @@
 /gen
 /db
 
+local.properties
+
 .*.swp
