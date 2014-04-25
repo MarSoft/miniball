@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -26,7 +27,8 @@ import name.maryasin.miniball.data.*;
  * contained in a {@link DanceListActivity} in two-pane mode (on tablets) or a
  * {@link DanceDetailActivity} on handsets.
  */
-public class DanceDetailFragment extends Fragment implements OnItemClickListener {
+public class DanceDetailFragment extends Fragment
+   		implements OnItemClickListener, OnItemLongClickListener {
 	/**
 	 * The fragment argument representing the name of dance that this fragment
 	 * represents.
@@ -121,6 +123,8 @@ public class DanceDetailFragment extends Fragment implements OnItemClickListener
 		}
 		((ListView) rootView.findViewById(R.id.material_audio_list))
 			.setOnItemClickListener(this);
+		((ListView) rootView.findViewById(R.id.material_audio_list))
+			.setOnItemLongClickListener(this);
 
 		return rootView;
 	}
@@ -131,5 +135,11 @@ public class DanceDetailFragment extends Fragment implements OnItemClickListener
 		Intent i = new Intent(Intent.ACTION_VIEW);
 		i.setDataAndType(Uri.fromFile(m.getAudioFile()), "audio/*");
 		startActivity(i);
+	}
+
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id) {
+		// TODO
+		return false;
 	}
 }
