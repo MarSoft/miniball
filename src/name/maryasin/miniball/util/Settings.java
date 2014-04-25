@@ -1,4 +1,4 @@
-package name.maryasin.miniball.data;
+package name.maryasin.miniball.util;
 
 import java.io.IOException;
 
@@ -8,6 +8,8 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
+
+import name.maryasin.miniball.data.*;
 
 public class Settings implements OnSharedPreferenceChangeListener {
 	private static final String KEY_ROOTPATH = "cfg_rootPath";

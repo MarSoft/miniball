@@ -5,6 +5,8 @@ import java.util.*;
 
 import android.util.Log;
 
+import name.maryasin.miniball.util.Settings;
+
 /**
  * Helper class for providing sample content for user interfaces created by
  * Android template wizards.

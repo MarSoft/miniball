@@ -1,6 +1,6 @@
 package name.maryasin.miniball;
 
-import name.maryasin.miniball.data.Settings;
+import name.maryasin.miniball.util.Settings;
 import android.content.Intent;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
