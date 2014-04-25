@@ -19,8 +19,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import name.maryasin.miniball.R;
-import name.maryasin.miniball.data.DataManager;
-import name.maryasin.miniball.data.DataManager.Material;
+import name.maryasin.miniball.data.*;
 
 /**
  * A fragment representing a single Dance detail screen. This fragment is either
@@ -40,8 +39,8 @@ public class DanceDetailFragment extends Fragment implements OnItemClickListener
 	/**
 	 * The dance this fragment is presenting.
 	 */
-	private DataManager.Dance mDance;
-	private List<DataManager.Material> mMaterialList;
+	private Dance mDance;
+	private List<Material> mMaterialList;
 
 	/**
 	 * Mandatory empty constructor for the fragment manager to instantiate the
@@ -95,7 +94,7 @@ public class DanceDetailFragment extends Fragment implements OnItemClickListener
 			getActivity().setTitle(mDance.getName()); // FIXME: а что будет в планшетном режиме?
 			mMaterialList = mDance.findMaterials(null, true);
 			((ListView) rootView.findViewById(R.id.material_audio_list))
-					.setAdapter(new ArrayAdapter<DataManager.Material>(
+					.setAdapter(new ArrayAdapter<Material>(
 							getActivity(),
 							android.R.layout.simple_list_item_1,
 							android.R.id.text1,
