@@ -30,6 +30,8 @@ public class PlayerService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.i(TAG, "Received start id "+startId+": "+intent);
+		// TODO: handle intent, if needed
+
 		// Keep running until explicit stop
 		return START_STICKY;
 	}
@@ -49,6 +51,15 @@ public class PlayerService extends Service {
 	}
 
 	private void showNotification() {
-		// TODO
+		// FIXME: almost copied from http://developer.android.com/reference/android/app/Service.html
+		Notification n = new Notification(
+				R.drawable.ic_player,
+				"Player Service Running", // getText(R.string.something)
+				System.currentTimeMillis());
+		PendingIntent pi = PendingIntent.getActivity(
+				this, 0,
+				new Intent(this, LocalServiceActivities.Controller.class),
+				0);
+		n.setLatestEvent
 	}
 }
