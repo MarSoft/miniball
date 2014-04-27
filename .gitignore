@@ -3,7 +3,13 @@
 /bin
 /gen
 /db
+/out
 
 local.properties
 
 .*.swp
+
+# IntelliJ
+.idea
+.gradle
+build/
