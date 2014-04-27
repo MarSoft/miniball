@@ -1,5 +1,6 @@
 package name.maryasin.miniball.player;
 
+import name.maryasin.miniball.DanceListActivity;
 import name.maryasin.miniball.R;
 
 import android.app.*;
@@ -49,14 +50,14 @@ public class PlayerService extends Service {
 	private void showNotification() {
 		// FIXME: almost copied from http://developer.android.com/reference/android/app/Service.html
 		Notification n = new Notification.Builder(this)
-                .setContentTitle(getText(R.string.player_notification_title))
-                .setContentText(getText(R.string.player_notification_text))
-                .setSmallIcon(R.drawable.ic_player_small)
-                .setLargeIcon(R.drawable.ic_player_large)
-                .build();
+				.setContentTitle(getText(R.string.app_name))
+				.setContentText("Hello World")
+				.setSmallIcon(R.drawable.ic_notif)
+				.setLargeIcon(R.drawable.ic_player_large) // TODO: current material's image, if present
+				.build();
 		PendingIntent pi = PendingIntent.getActivity(
 				this, 0,
-				new Intent(this, LocalServiceActivities.Controller.class),
+				new Intent(this, DanceListActivity.class),
 				0);
 	}
 }
