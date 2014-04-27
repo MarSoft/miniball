@@ -1,27 +1,23 @@
 package name.maryasin.miniball.player;
 
 import name.maryasin.miniball.R;
-import name.maryasin.miniball.data.*;
 
 import android.app.*;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.os.*;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.File;
-
 public class PlayerService extends Service {
-	private NotificationManager notifMgr;
+	private NotificationManager notificationMgr;
 
-	private static final int NOTIF_ID = R.string.local_service_id;
+	private static final int NOTIFICATION_ID = R.string.local_service_id;
 
 	public static final String TAG = "PlayerService";
 
 	@Override
 	public void onCreate() {
-		notifMgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+		notificationMgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
 		// show persistent notification
 		showNotification();
@@ -39,7 +35,7 @@ public class PlayerService extends Service {
 	@Override
 	public void onDestroy() {
 		// hide persistent notification
-		notifMgr.cancel(NOTIF_ID);
+		notificationMgr.cancel(NOTIFICATION_ID);
 		// Debug, FIXME
 		Toast.makeText(this, "PlayerService stopped", Toast.LENGTH_SHORT).show();
 	}
@@ -52,14 +48,15 @@ public class PlayerService extends Service {
 
 	private void showNotification() {
 		// FIXME: almost copied from http://developer.android.com/reference/android/app/Service.html
-		Notification n = new Notification(
-				R.drawable.ic_player,
-				"Player Service Running", // getText(R.string.something)
-				System.currentTimeMillis());
+		Notification n = new Notification.Builder(this)
+                .setContentTitle(getText(R.string.player_notification_title))
+                .setContentText(getText(R.string.player_notification_text))
+                .setSmallIcon(R.drawable.ic_player_small)
+                .setLargeIcon(R.drawable.ic_player_large)
+                .build();
 		PendingIntent pi = PendingIntent.getActivity(
 				this, 0,
 				new Intent(this, LocalServiceActivities.Controller.class),
 				0);
-		n.setLatestEvent
 	}
 }
