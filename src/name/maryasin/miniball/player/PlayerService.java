@@ -53,11 +53,17 @@ public class PlayerService extends Service {
 				.setContentTitle(getText(R.string.app_name))
 				.setContentText("Hello World")
 				.setSmallIcon(R.drawable.ic_notif)
-				.setLargeIcon(R.drawable.ic_player_large) // TODO: current material's image, if present
+				//.setLargeIcon(R.drawable.ic_player_large) // TODO: current material's image, if present
 				.build();
 		PendingIntent pi = PendingIntent.getActivity(
 				this, 0,
 				new Intent(this, DanceListActivity.class),
 				0);
+	}
+
+	public void playbackStart() {
+	}
+
+	public void playbackStop() {
 	}
 }
