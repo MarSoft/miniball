@@ -14,20 +14,35 @@ import android.widget.Toast;
 
 public class PlayerService extends Service implements
 		MediaPlayer.OnCompletionListener {
+
+	///////////////
+	// Constants //
+
 	public static final String ACTION_ENQUEUE = "name.maryasin.miniball.action.ENQUEUE";
 	public static final String ACTION_STOP = "name.maryasin.miniball.action.STOP";
-
-	private NotificationManager notificationMgr;
 
 	private static final int NOTIFICATION_ID = 1;
 
 	public static final String TAG = "PlayerService";
 
+	////////////
+	// Fields //
+
+	private NotificationManager notificationMgr;
+
+	/** For IPC: application-wide instance of the service */
+	private static PlayerService sInstance;
+
+	///////////////////////
+	// Service callbacks //
+
 	@Override
 	public void onCreate() {
+		sInstance = this;
+
 		notificationMgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
-		// show persistent notification
+		// start service as foreground, and show persistent notification
 		startForeground(NOTIFICATION_ID, makeNotification());
 	}
 
@@ -35,7 +50,11 @@ public class PlayerService extends Service implements
 	public void onDestroy() {
 		// hide persistent notification
 		notificationMgr.cancel(NOTIFICATION_ID);
+		// and to really remove notification created by startForeground:
+		stopForeground(true);
+
 		// TODO: stop music if still playing
+
 		// Debug, FIXME
 		Toast.makeText(this, "PlayerService stopped", Toast.LENGTH_SHORT).show();
 	}
@@ -73,6 +92,16 @@ public class PlayerService extends Service implements
 	@Override
 	public void onCompletion(MediaPlayer mp) {
 		// TODO
+	}
+
+	/////////////////////////////////////////
+	// Inter-process communication methods //
+
+	public static PlayerService getInstance() {
+		if(sInstance == null) {
+			// TODO: Start service
+		}
+		return sInstance;
 	}
 
 	/////////////////////
