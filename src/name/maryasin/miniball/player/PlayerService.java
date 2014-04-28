@@ -26,7 +26,7 @@ public class PlayerService extends Service {
 		notificationMgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
 		// show persistent notification
-		showNotification();
+		startForeground(NOTIFICATION_ID, makeNotification());
 	}
 
 	@Override
@@ -65,7 +65,11 @@ public class PlayerService extends Service {
 		return null;
 	}
 
-	private void showNotification() {
+	/**
+	 * Construct a notification adequate with current state.
+	 * @return Notification
+	 */
+	private Notification makeNotification() {
 		PendingIntent piClick = PendingIntent.getActivity(
 				this, 0,
 				new Intent(this, DanceListActivity.class), // FIXME: use PlayerActivity
@@ -83,7 +87,10 @@ public class PlayerService extends Service {
 				.setContentIntent(piClick)
 				.addAction(R.drawable.ic_action_next, getText(R.string.action_next), piNext)
 				.build();
-		notificationMgr.notify(NOTIFICATION_ID, n);
+		return n;
+	}
+	private void updateNotification() {
+		notificationMgr.notify(NOTIFICATION_ID, makeNotification());
 	}
 
 	public void playbackStart() {
