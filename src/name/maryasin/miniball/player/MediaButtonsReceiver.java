@@ -17,10 +17,37 @@ public class MediaButtonsReceiver extends BroadcastReceiver {
 		if(evt == null)
 			return false;
 
+		String act = null;
+
 		switch(evt.getKeyCode()) {
 			case KeyEvent.KEYCODE_HEADSETHOOK:
+			case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+				act = PlayerService.ACTION_PLAYPAUSE;
+				break;
+			case KeyEvent.KEYCODE_MEDIA_NEXT:
+				//TODO act = PlayerService.ACTION_NEXT;
+				break;
+			case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+				act = PlayerService.ACTION_REPLAY;
+				break;
+			case KeyEvent.KEYCODE_MEDIA_PLAY:
+				act = PlayerService.ACTION_PLAY;
+				break;
+			case KeyEvent.KEYCODE_MEDIA_PAUSE:
+				act = PlayerService.ACTION_PAUSE;
+				break;
+			default:
+				return false; // don't consume
 		}
-		return false;
+		if(act == null) // just for ...
+			return false;
+		if(evt.getAction() != KeyEvent.ACTION_DOWN)
+			return true; // consume but not process
+
+		Intent intent = new Intent(ctx, PlayerService.class);
+		intent.setAction(act);
+		ctx.startService(intent);
+		return true;
 	}
 
 	public static void register(Context ctx) {
