@@ -277,8 +277,7 @@ public class PlayerService extends Service implements
 		}
 		//mAudioManager.registerMediaButtonEventReceiver(this);
 		// ? mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-		// TODO: implement unmute
-		//mAudioManager.setStreamMute(AudioManager.STREAM_RING, true);
+		mAudioManager.setStreamMute(AudioManager.STREAM_RING, true);
 		mPlayer.start();
 		updateNotification();
 	}
@@ -286,12 +285,14 @@ public class PlayerService extends Service implements
 		Log.i(TAG, "Stopping playback");
 		mPlayer.pause();
 		mPlayer.seekTo(0);
+		mAudioManager.setStreamMute(AudioManager.STREAM_RING, false);
 		mAudioManager.abandonAudioFocus(this);
 		updateNotification();
 	}
 	public void playbackPause() {
 		Log.i(TAG, "Pausing playback");
 		mPlayer.pause();
+		mAudioManager.setStreamMute(AudioManager.STREAM_RING, false);
 		mAudioManager.abandonAudioFocus(this);
 		updateNotification();
 	}
