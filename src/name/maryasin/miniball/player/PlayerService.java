@@ -24,6 +24,7 @@ import java.util.List;
 public class PlayerService extends Service implements
 		MediaPlayer.OnCompletionListener,
 		MediaPlayer.OnErrorListener,
+		AudioManager.OnAudioFocusChangeListener,
 		Handler.Callback {
 
 	///////////////
@@ -51,6 +52,7 @@ public class PlayerService extends Service implements
 
 	private List<Material> playbackQueue = new ArrayList<Material>();
 
+	private AudioManager mAudioManager;
 	private MediaPlayer mPlayer;
 
 	private Handler mNotificationUpdateHandler = new Handler(this);
@@ -64,6 +66,7 @@ public class PlayerService extends Service implements
 		notificationMgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
 		mPlayer = createMediaPlayer();
+		mAudioManager = (AudioManager)getSystemService(AUDIO_SERVICE);
 
 		// start service as foreground, and show persistent notification
 		startForeground(NOTIFICATION_ID, createNotification());
@@ -149,6 +152,23 @@ public class PlayerService extends Service implements
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void onAudioFocusChange(int type) {
+		Log.d(TAG, "Audio focus change: "+type);
+		switch(type) {
+			case AudioManager.AUDIOFOCUS_LOSS:
+				playbackPause();
+				break;
+			case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+			case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+				// ignore and keep playing
+				break;
+			case AudioManager.AUDIOFOCUS_GAIN:
+				playbackStart(); // FIXME: only if was not paused
+				break;
+		}
 	}
 
 	/////////////////////////////////////////
@@ -248,6 +268,7 @@ public class PlayerService extends Service implements
 	public void playbackStart() {
 		Log.i(TAG, "Starting playback");
 		mPlayer.start();
+		mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
 		updateNotification();
 	}
 	public void playbackStop() {
