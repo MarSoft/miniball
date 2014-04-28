@@ -57,7 +57,7 @@ public class PlayerService extends Service implements
 		mPlayer = createMediaPlayer();
 
 		// start service as foreground, and show persistent notification
-		startForeground(NOTIFICATION_ID, makeNotification());
+		startForeground(NOTIFICATION_ID, createNotification());
 	}
 
 	@Override
@@ -149,7 +149,7 @@ public class PlayerService extends Service implements
 	 * Construct a notification adequate with current state.
 	 * @return Notification
 	 */
-	private Notification makeNotification() {
+	private Notification createNotification() {
 		PendingIntent piClick = PendingIntent.getActivity(
 				this, 0,
 				new Intent(this, DanceListActivity.class), // FIXME: use PlayerActivity
@@ -158,9 +158,15 @@ public class PlayerService extends Service implements
 				this, 0,
 				new Intent(this, DanceListActivity.class),
 				0);
+
+		Material ct = getCurrentTrack();
+		String trackName = "<No track loaded>";
+		if(ct != null)
+			trackName = ct.name;
 		Notification n = new NotificationCompat.Builder(this)
 				.setContentTitle(getText(R.string.app_name))
-				.setContentText("Hello World")
+				.setContentText(trackName)
+				.setContentInfo(mPlayer.isPlaying() ? "|>" : "[]")
 				.setSmallIcon(R.drawable.ic_notif)
 				//.setLargeIcon(R.drawable.ic_player_large) // TODO: current material's image, if present
 				.setOngoing(true)
@@ -170,7 +176,7 @@ public class PlayerService extends Service implements
 		return n;
 	}
 	private void updateNotification() {
-		notificationMgr.notify(NOTIFICATION_ID, makeNotification());
+		notificationMgr.notify(NOTIFICATION_ID, createNotification());
 	}
 
 	private MediaPlayer createMediaPlayer() {
@@ -185,15 +191,19 @@ public class PlayerService extends Service implements
 		try {
 			mPlayer.setDataSource(track.getAudioFile().getPath());
 			mPlayer.prepare();
-			mPlayer.start();
+			playbackStart();
 		} catch(IOException ex) {
 			Log.e(TAG, ""+ex);
 		}
 	}
 
 	public void playbackStart() {
+		mPlayer.start();
+		updateNotification();
 	}
 
 	public void playbackStop() {
+		mPlayer.stop();
+		updateNotification();
 	}
 }
