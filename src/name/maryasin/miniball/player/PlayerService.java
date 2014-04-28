@@ -163,7 +163,8 @@ public class PlayerService extends Service implements
 
 	@Override
 	public void onCompletion(MediaPlayer mp) {
-		// TODO
+		updateNotification();
+		// TODO: go to next track if needed
 	}
 
 	@Override
@@ -277,6 +278,7 @@ public class PlayerService extends Service implements
 			updateRemotePlayState(state,
 					mPlayer.getCurrentPosition());
 		}
+		broadcastStockUpdate(getCurrentTrack());
 
 		return n;
 	}
@@ -339,6 +341,16 @@ public class PlayerService extends Service implements
 		}
 	}
 
+	private void broadcastStockUpdate(Material track) {
+		if(track == null)
+			return;
+		Intent intent = new Intent("com.android.music.playstatechanged");
+		intent.putExtra("playing", mPlayer.isPlaying());
+		intent.putExtra("track", track.name);
+		intent.putExtra("album", track.dance.getName());
+		sendBroadcast(intent);
+	}
+
 	////////////////
 	// Operations //
 
@@ -356,6 +368,7 @@ public class PlayerService extends Service implements
 			} else {
 				updateRemote(track);
 			}
+			broadcastStockUpdate(track);
 		} catch(IOException ex) {
 			Log.e(TAG, ""+ex);
 		}
