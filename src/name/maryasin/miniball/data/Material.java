@@ -16,7 +16,7 @@ public class Material implements Comparable<Material> {
 	/*package*/ File audioFile;
 	private Set<String> tags;
 	
-	public Material(Dance dance, String name) {
+	/*package*/ Material(Dance dance, String name) {
 		this.dance = dance;
 		this.name = name;
 		tags = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
