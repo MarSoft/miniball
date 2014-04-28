@@ -415,7 +415,7 @@ public class PlayerService extends Service implements
 			broadcastStockPlaystateCompleted();
 	}
 	public void playbackStop() {
-		if(mPlayer.isPlaying()) {
+		if(mPlayer.isPlaying() || mPlayer.getCurrentPosition() != 0) { // if playing or just paused
 			playbackHalt(true);
 		} else {
 			Log.d(TAG, "Terminating service");
