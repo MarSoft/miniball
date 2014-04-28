@@ -204,6 +204,7 @@ public class PlayerService extends Service implements
 
 	private void playTrack(Material track) {
 		try {
+			mPlayer.reset();
 			mPlayer.setDataSource(track.getAudioFile().getPath());
 			mPlayer.prepare();
 			playbackStart();
