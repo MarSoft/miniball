@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="local_service_id">name.maryasin.miniball.player.PlayerService</string>
 	<string name="app_name">MiniBall</string>
 	<string name="title_dance_detail">Dance Detail</string>
 	<string name="action_settings">Settings</string>

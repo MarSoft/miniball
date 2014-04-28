@@ -17,7 +17,7 @@ public class PlayerService extends Service {
 
 	private NotificationManager notificationMgr;
 
-	private static final int NOTIFICATION_ID = R.string.local_service_id;
+	private static final int NOTIFICATION_ID = 1;
 
 	public static final String TAG = "PlayerService";
 
