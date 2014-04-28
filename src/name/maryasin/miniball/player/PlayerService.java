@@ -28,7 +28,7 @@ public class PlayerService extends Service implements
 
 	public static final String ACTION_ENQUEUE = "name.maryasin.miniball.action.ENQUEUE";
 	public static final String ACTION_STOP = "name.maryasin.miniball.action.STOP";
-	public static final String ACTION_RESTART = "name.maryasin.miniball.action.RESTART";
+	public static final String ACTION_REPLAY = "name.maryasin.miniball.action.REPLAY";
 
 	private static final int NOTIFICATION_ID = 1;
 
@@ -96,7 +96,7 @@ public class PlayerService extends Service implements
 				}
 			} else if(ACTION_STOP.equals(action)) {
 				playbackStop();
-			} else if(ACTION_RESTART.equals(action)) {
+			} else if(ACTION_REPLAY.equals(action)) {
 				playbackRestart();
 			} else {
 				Log.w(TAG, "Unknown action: "+action);
@@ -157,10 +157,10 @@ public class PlayerService extends Service implements
 				this, 0,
 				new Intent(this, DanceListActivity.class), // FIXME: use PlayerActivity
 				0);
-		PendingIntent piNext = PendingIntent.getActivity(
-				this, 0,
-				new Intent(this, DanceListActivity.class),
-				0);
+		PendingIntent piStop = PendingIntent.getActivity(this, 0,
+				new Intent(ACTION_STOP, null, this, PlayerService.class), 0);
+		PendingIntent piReplay = PendingIntent.getActivity(this, 0,
+				new Intent(ACTION_REPLAY, null, this, PlayerService.class), 0);
 
 		Material ct = getCurrentTrack();
 		String trackName = "<No track loaded>";
@@ -174,7 +174,8 @@ public class PlayerService extends Service implements
 				//.setLargeIcon(R.drawable.ic_player_large) // TODO: current material's image, if present
 				.setOngoing(true)
 				.setContentIntent(piClick)
-				.addAction(R.drawable.ic_action_next, getText(R.string.action_next), piNext)
+				.addAction(R.drawable.ic_action_stop, getText(R.string.action_stop), piStop)
+				.addAction(R.drawable.ic_action_replay, getText(R.string.action_replay), piReplay)
 				.build();
 		return n;
 	}
