@@ -91,8 +91,9 @@ public class PlayerService extends Service implements
 				Material track = DataManager.getMaterialFromUri(trackUri);
 				if(track.hasAudio()) {
 					Log.i(TAG, "Enqueue track: " + track);
+					// FIXME: do enqueue, not just play
+					playbackQueue.clear();
 					playbackQueue.add(track);
-					// FIXME: if already playing?
 					playTrack(track);
 				} else {
 					Toast.makeText(this, "Material has no audio: " + track, Toast.LENGTH_SHORT).show();
@@ -184,7 +185,8 @@ public class PlayerService extends Service implements
 				//.setLargeIcon(R.drawable.ic_player_large) // TODO: current material's image, if present
 				.setOngoing(true)
 				.setContentIntent(piClick)
-				.addAction(R.drawable.ic_action_pause, getText(R.string.action_pause), piPause)
+				.addAction(mPlayer.isPlaying() ? R.drawable.ic_action_pause : R.drawable.ic_action_play,
+						getText(R.string.action_pause), piPause)
 				.addAction(R.drawable.ic_action_stop, getText(R.string.action_stop), piStop)
 				.addAction(R.drawable.ic_action_replay, getText(R.string.action_replay), piReplay)
 				.build();
