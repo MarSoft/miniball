@@ -7,6 +7,7 @@ import name.maryasin.miniball.data.Material;
 
 import android.app.*;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.*;
@@ -40,6 +41,8 @@ public class PlayerService extends Service implements
 
 	private List<Material> playbackQueue = new ArrayList<Material>();
 
+	private MediaPlayer mPlayer;
+
 	///////////////////////
 	// Service callbacks //
 
@@ -48,6 +51,8 @@ public class PlayerService extends Service implements
 		sInstance = this;
 
 		notificationMgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+
+		mPlayer = createMediaPlayer();
 
 		// start service as foreground, and show persistent notification
 		startForeground(NOTIFICATION_ID, makeNotification());
@@ -60,7 +65,11 @@ public class PlayerService extends Service implements
 		// and to really remove notification created by startForeground:
 		stopForeground(true);
 
-		// TODO: stop music if still playing
+		if(mPlayer != null) {
+			// TODO: save position?
+			mPlayer.release();
+			mPlayer = null;
+		}
 
 		// Debug, FIXME
 		Toast.makeText(this, "PlayerService stopped", Toast.LENGTH_SHORT).show();
@@ -152,6 +161,13 @@ public class PlayerService extends Service implements
 	}
 	private void updateNotification() {
 		notificationMgr.notify(NOTIFICATION_ID, makeNotification());
+	}
+
+	private MediaPlayer createMediaPlayer() {
+		MediaPlayer mp = new MediaPlayer();
+		mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
+		mp.setOnCompletionListener(this);
+		return mp;
 	}
 
 	public void playbackStart() {
