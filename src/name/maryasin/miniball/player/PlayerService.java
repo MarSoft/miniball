@@ -5,12 +5,16 @@ import name.maryasin.miniball.R;
 import name.maryasin.miniball.data.DataManager;
 import name.maryasin.miniball.data.Material;
 
+import android.annotation.TargetApi;
 import android.app.*;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.media.RemoteControlClient;
 import android.net.Uri;
 import android.os.*;
 import android.support.v4.app.NotificationCompat;
@@ -55,6 +59,7 @@ public class PlayerService extends Service implements
 
 	private AudioManager mAudioManager;
 	private MediaPlayer mPlayer;
+	private RemoteControlClient mRemote;
 	private boolean isTrackLoaded = false;
 
 	private Handler mNotificationUpdateHandler = new Handler(this);
@@ -70,6 +75,8 @@ public class PlayerService extends Service implements
 		mPlayer = createMediaPlayer();
 		mAudioManager = (AudioManager)getSystemService(AUDIO_SERVICE);
 
+		registerRemote();
+
 		// TODO: restore saved track&position
 
 		// start service as foreground, and show persistent notification
@@ -82,6 +89,8 @@ public class PlayerService extends Service implements
 		notificationMgr.cancel(NOTIFICATION_ID);
 		// and to really remove notification created by startForeground:
 		stopForeground(true);
+
+		MediaButtonsReceiver.unregister(this);
 
 		if(mPlayer != null) {
 			// TODO: save position?
@@ -178,14 +187,12 @@ public class PlayerService extends Service implements
 		switch(type) {
 			case AudioManager.AUDIOFOCUS_LOSS:
 				playbackPause();
-				MediaButtonsReceiver.unregister(this);
 				break;
 			case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
 			case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
 				// ignore and keep playing
 				break;
 			case AudioManager.AUDIOFOCUS_GAIN:
-				MediaButtonsReceiver.register(this);
 				playbackStart(); // FIXME: only if was not paused by user
 				break;
 		}
@@ -275,17 +282,51 @@ public class PlayerService extends Service implements
 		return mp;
 	}
 
+	@TargetApi(14)
+	private void registerRemote() {
+		MediaButtonsReceiver.register(this);
+
+		Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+		intent.setComponent(new ComponentName(getPackageName(), MediaButtonsReceiver.class.getName()));
+		PendingIntent pi = PendingIntent.getBroadcast(this, 0, intent, 0);
+		RemoteControlClient r = new RemoteControlClient(pi);
+		r.setTransportControlFlags(RemoteControlClient.FLAG_KEY_MEDIA_NEXT
+				| RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS
+				| RemoteControlClient.FLAG_KEY_MEDIA_PAUSE
+				| RemoteControlClient.FLAG_KEY_MEDIA_PLAY
+				| RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE);
+		mAudioManager.registerRemoteControlClient(r);
+		mRemote = r;
+	}
+
+	@TargetApi(14)
+	private void updateRemote(Material track) {
+		Log.d(TAG, "Updating media metadata with " + track);
+		RemoteControlClient.MetadataEditor e = mRemote.editMetadata(true);
+
+		e.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, track.dance.getName());
+		e.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, track.name);
+
+		e.apply();
+	}
+
 	////////////////
 	// Operations //
 
 	public void playTrack(Material track) {
-		Log.d(TAG, "playTrack "+track);
+		Log.d(TAG, "playTrack " + track);
 		try {
 			mPlayer.reset();
 			mPlayer.setDataSource(track.getAudioFile().getPath());
 			mPlayer.prepare();
 			isTrackLoaded = true;
 			playbackStart();
+			// And now update remote control info
+			if(mRemote == null) {
+				Log.w(TAG, "No remote control client registered!");
+			} else {
+				updateRemote(track);
+			}
 		} catch(IOException ex) {
 			Log.e(TAG, ""+ex);
 		}
@@ -297,7 +338,6 @@ public class PlayerService extends Service implements
 			Toast.makeText(this, "Audio focus request failed!", Toast.LENGTH_SHORT);
 			return;
 		}
-		//mAudioManager.registerMediaButtonEventReceiver(this);
 		// ? mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 		mAudioManager.setStreamMute(AudioManager.STREAM_RING, true);
 		mPlayer.start();
