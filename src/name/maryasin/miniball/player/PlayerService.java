@@ -28,6 +28,7 @@ public class PlayerService extends Service {
 	public void onDestroy() {
 		// hide persistent notification
 		notificationMgr.cancel(NOTIFICATION_ID);
+		// TODO stop music
 		// Debug, FIXME
 		Toast.makeText(this, "PlayerService stopped", Toast.LENGTH_SHORT).show();
 	}
@@ -36,6 +37,9 @@ public class PlayerService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.i(TAG, "Received start id "+startId+": "+intent);
 		// TODO: handle intent, if needed
+		if(intent == null) {
+			// We were restarted by system. TODO: resume playback form stored position
+		}
 
 		// Keep running until explicit stop
 		return START_STICKY;

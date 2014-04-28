@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import name.maryasin.miniball.R;
 import name.maryasin.miniball.data.*;
+import name.maryasin.miniball.player.PlayerService;
 
 /**
  * A fragment representing a single Dance detail screen. This fragment is either
@@ -132,8 +133,10 @@ public class DanceDetailFragment extends Fragment
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
 		Material m = mMaterialList.get(pos);
-		Intent i = new Intent(Intent.ACTION_VIEW);
-		// TODO
+		Intent i = new Intent(getActivity(), PlayerService.class);
+		// TODO: custom data type, with our content provider
+		i.setData(Uri.fromFile(m.getAudioFile()));
+		getActivity().startService(i);
 	}
 
 	@Override
