@@ -209,7 +209,7 @@ public class PlayerService extends Service implements
 				.setOngoing(true)
 				.setContentIntent(piClick)
 				.addAction(mPlayer.isPlaying() ? R.drawable.ic_action_pause : R.drawable.ic_action_play,
-						getText(R.string.action_pause), piPause)
+						getText(mPlayer.isPlaying() ? R.string.action_pause : R.string.action_play), piPause)
 				.addAction(R.drawable.ic_action_stop, getText(R.string.action_stop), piStop)
 				.addAction(R.drawable.ic_action_replay, getText(R.string.action_replay), piReplay)
 				.build();
