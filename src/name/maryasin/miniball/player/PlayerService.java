@@ -348,6 +348,7 @@ public class PlayerService extends Service implements
 		intent.putExtra("playing", mPlayer.isPlaying());
 		intent.putExtra("track", track.name);
 		intent.putExtra("album", track.dance.getName());
+		intent.putExtra("duration", mPlayer.getDuration());
 		sendBroadcast(intent);
 	}
 
