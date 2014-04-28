@@ -268,6 +268,15 @@ public class PlayerService extends Service implements
 					1050 - mPlayer.getCurrentPosition() % 1000); // update after position changes
 		}
 
+		if(mRemote != null) {
+			updateRemotePlayState(mPlayer.isPlaying() ?
+					RemoteControlClient.PLAYSTATE_PLAYING :
+					mPlayer.getCurrentPosition() > 0 ?
+					RemoteControlClient.PLAYSTATE_PAUSED :
+					RemoteControlClient.PLAYSTATE_STOPPED,
+					mPlayer.getCurrentPosition());
+		}
+
 		return n;
 	}
 	private void updateNotification() {
@@ -314,6 +323,11 @@ public class PlayerService extends Service implements
 		e.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, track.name);
 
 		e.apply();
+	}
+	@TargetApi(18)
+	private void updateRemotePlayState(int newState, long time) {
+		if(mRemote != null)
+			mRemote.setPlaybackState(newState, time, 1);
 	}
 
 	////////////////
