@@ -178,12 +178,14 @@ public class PlayerService extends Service implements
 		switch(type) {
 			case AudioManager.AUDIOFOCUS_LOSS:
 				playbackPause();
+				MediaButtonsReceiver.unregister(this);
 				break;
 			case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
 			case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
 				// ignore and keep playing
 				break;
 			case AudioManager.AUDIOFOCUS_GAIN:
+				MediaButtonsReceiver.register(this);
 				playbackStart(); // FIXME: only if was not paused by user
 				break;
 		}
