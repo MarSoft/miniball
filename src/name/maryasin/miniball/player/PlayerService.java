@@ -69,6 +69,8 @@ public class PlayerService extends Service implements
 		mPlayer = createMediaPlayer();
 		mAudioManager = (AudioManager)getSystemService(AUDIO_SERVICE);
 
+		// TODO: restore saved track&position
+
 		// start service as foreground, and show persistent notification
 		startForeground(NOTIFICATION_ID, createNotification());
 	}
@@ -91,42 +93,43 @@ public class PlayerService extends Service implements
 		Toast.makeText(this, "PlayerService stopped", Toast.LENGTH_SHORT).show();
 	}
 
+	private void handleIntent(Intent intent) {
+		if(intent == null)
+			return;
+		String action = intent.getAction();
+		if(ACTION_ENQUEUE.equals(action)) {
+			Uri trackUri = intent.getData();
+			Material track = DataManager.getMaterialFromUri(trackUri);
+			if(track.hasAudio()) {
+				Log.i(TAG, "Enqueue track: " + track);
+				// FIXME: do enqueue, not just play
+				playbackQueue.clear();
+				playbackQueue.add(track);
+				playTrack(track);
+			} else {
+				Toast.makeText(this, "Material has no audio: " + track, Toast.LENGTH_SHORT).show();
+			}
+		} else if(ACTION_PLAY.equals(action)) {
+			playbackStart();
+		} else if(ACTION_PAUSE.equals(action)) {
+			playbackPause();
+		} else if(ACTION_PLAYPAUSE.equals(action)) {
+			if(mPlayer.isPlaying())
+				playbackPause();
+			else
+				playbackStart();
+		} else if(ACTION_STOP.equals(action)) {
+			playbackStop();
+		} else if(ACTION_REPLAY.equals(action)) {
+			playbackRestart();
+		} else {
+			Log.w(TAG, "Unknown action: "+action);
+		}
+	}
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.i(TAG, "Received start id "+startId+": "+intent);
-		if(intent != null) {
-			String action = intent.getAction();
-			if(ACTION_ENQUEUE.equals(action)) {
-				Uri trackUri = intent.getData();
-				Material track = DataManager.getMaterialFromUri(trackUri);
-				if(track.hasAudio()) {
-					Log.i(TAG, "Enqueue track: " + track);
-					// FIXME: do enqueue, not just play
-					playbackQueue.clear();
-					playbackQueue.add(track);
-					playTrack(track);
-				} else {
-					Toast.makeText(this, "Material has no audio: " + track, Toast.LENGTH_SHORT).show();
-				}
-			} else if(ACTION_PLAY.equals(action)) {
-				playbackStart();
-			} else if(ACTION_PAUSE.equals(action)) {
-				playbackPause();
-			} else if(ACTION_PLAYPAUSE.equals(action)) {
-				if(mPlayer.isPlaying())
-					playbackPause();
-				else
-					playbackStart();
-			} else if(ACTION_STOP.equals(action)) {
-				playbackStop();
-			} else if(ACTION_REPLAY.equals(action)) {
-				playbackRestart();
-			} else {
-				Log.w(TAG, "Unknown action: "+action);
-			}
-		} else {
-			// We were restarted by system. TODO: resume playback form stored position?
-		}
+		handleIntent(intent);
 
 		// Keep running until explicit stop
 		return START_STICKY;
