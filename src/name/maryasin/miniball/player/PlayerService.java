@@ -157,9 +157,9 @@ public class PlayerService extends Service implements
 				this, 0,
 				new Intent(this, DanceListActivity.class), // FIXME: use PlayerActivity
 				0);
-		PendingIntent piStop = PendingIntent.getActivity(this, 0,
+		PendingIntent piStop = PendingIntent.getService(this, 0,
 				new Intent(ACTION_STOP, null, this, PlayerService.class), 0);
-		PendingIntent piReplay = PendingIntent.getActivity(this, 0,
+		PendingIntent piReplay = PendingIntent.getService(this, 0,
 				new Intent(ACTION_REPLAY, null, this, PlayerService.class), 0);
 
 		Material ct = getCurrentTrack();
