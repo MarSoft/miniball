@@ -74,7 +74,12 @@ public class PlayerService extends Service implements
 			if(ACTION_ENQUEUE.equals(action)) {
 				Uri trackUri = intent.getData();
 				Material track = DataManager.getMaterialFromUri(trackUri);
-				Log.i(TAG, "Enqueue track: "+track);
+				if(track.hasAudio()) {
+					Log.i(TAG, "Enqueue track: " + track);
+					playbackQueue.add(track);
+				} else {
+					Toast.makeText(this, "Material has no audio: " + track, Toast.LENGTH_SHORT).show();
+				}
 			} else if(ACTION_STOP.equals(action)) {
 				Log.i(TAG, "Stop playback");
 			} else {
