@@ -357,6 +357,10 @@ public class PlayerService extends Service implements
 		intent.putExtra("duration", mPlayer.getDuration());
 		sendBroadcast(intent);
 	}
+	private void broadcastStockPlaystateCompleted() {
+		Intent intent = new Intent("com.android.music.playbackcomplete");
+		sendBroadcast(intent);
+	}
 
 	////////////////
 	// Operations //
@@ -401,6 +405,8 @@ public class PlayerService extends Service implements
 		mAudioManager.setStreamMute(AudioManager.STREAM_RING, false);
 		mAudioManager.abandonAudioFocus(this);
 		updateNotification();
+		if(stop)
+			broadcastStockPlaystateCompleted();
 	}
 	public void playbackStop() {
 		playbackHalt(true);
