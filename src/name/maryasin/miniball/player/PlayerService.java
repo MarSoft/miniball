@@ -2,6 +2,7 @@ package name.maryasin.miniball.player;
 
 import name.maryasin.miniball.DanceListActivity;
 import name.maryasin.miniball.R;
+import name.maryasin.miniball.data.Material;
 
 import android.app.*;
 import android.content.Intent;
@@ -11,6 +12,9 @@ import android.os.*;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class PlayerService extends Service implements
 		MediaPlayer.OnCompletionListener {
@@ -32,6 +36,8 @@ public class PlayerService extends Service implements
 
 	/** For IPC: application-wide instance of the service */
 	private static PlayerService sInstance;
+
+	private List<Material> playbackQueue = new ArrayList<Material>();
 
 	///////////////////////
 	// Service callbacks //
@@ -102,6 +108,12 @@ public class PlayerService extends Service implements
 			// TODO: Start service
 		}
 		return sInstance;
+	}
+
+	public Material getCurrentTrack() {
+		if(playbackQueue.size() == 0)
+			return null;
+		return playbackQueue.get(0);
 	}
 
 	/////////////////////
