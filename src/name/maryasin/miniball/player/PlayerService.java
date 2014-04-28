@@ -94,7 +94,7 @@ public class PlayerService extends Service implements
 
 		if(mPlayer != null) {
 			// TODO: save position?
-			playbackStop(); // release any audio locks
+			playbackHalt(true); // release any audio locks
 			mPlayer.release();
 			mPlayer = null;
 		}
@@ -409,7 +409,11 @@ public class PlayerService extends Service implements
 			broadcastStockPlaystateCompleted();
 	}
 	public void playbackStop() {
-		playbackHalt(true);
+		if(mPlayer.isPlaying()) {
+			playbackHalt(true);
+		} else {
+			stopSelf();
+		}
 	}
 	public void playbackPause() {
 		playbackHalt(false);
