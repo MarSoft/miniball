@@ -157,7 +157,7 @@ public class Dance extends Alias {
 	}
 
 	public Uri getUri() {
-		return Uri.fromParts("miniball", getName(), null);
+		return Uri.parse("miniball://"+getName()+"/");
 	}
 	
 	/**
