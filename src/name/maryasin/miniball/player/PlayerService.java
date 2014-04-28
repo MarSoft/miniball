@@ -164,6 +164,9 @@ public class PlayerService extends Service implements
 				this, 0,
 				new Intent(this, DanceListActivity.class), // FIXME: use PlayerActivity
 				0);
+		PendingIntent piPause = PendingIntent.getService(this, 0,
+				new Intent(mPlayer.isPlaying() ? ACTION_PAUSE : ACTION_PLAY,
+						null, this, PlayerService.class), 0);
 		PendingIntent piStop = PendingIntent.getService(this, 0,
 				new Intent(ACTION_STOP, null, this, PlayerService.class), 0);
 		PendingIntent piReplay = PendingIntent.getService(this, 0,
@@ -181,6 +184,7 @@ public class PlayerService extends Service implements
 				//.setLargeIcon(R.drawable.ic_player_large) // TODO: current material's image, if present
 				.setOngoing(true)
 				.setContentIntent(piClick)
+				.addAction(R.drawable.ic_action_pause, getText(R.string.action_pause), piPause)
 				.addAction(R.drawable.ic_action_stop, getText(R.string.action_stop), piStop)
 				.addAction(R.drawable.ic_action_replay, getText(R.string.action_replay), piReplay)
 				.build();
