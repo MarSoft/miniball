@@ -245,4 +245,22 @@ public class PlayerService extends Service implements
 		mPlayer.start();
 		updateNotification();
 	}
+
+	//////////////////////
+	// Helper functions //
+
+	public String positionToStr(int millis) {
+		millis /= 1000;
+		int s = millis % 60;
+		millis /= 60;
+		int m = millis % 60;
+		int h = millis / 60;
+
+		StringBuffer buf = new StringBuffer();
+		if(h > 0) buf.append(String.format("%02d:", h));
+		if(m > 0) buf.append(String.format("%02d:", m));
+		buf.append(String.format("%02d", s));
+		
+		return buf.toString();
+	}
 }
