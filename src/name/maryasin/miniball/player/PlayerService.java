@@ -15,6 +15,7 @@ import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -87,6 +88,8 @@ public class PlayerService extends Service implements
 				if(track.hasAudio()) {
 					Log.i(TAG, "Enqueue track: " + track);
 					playbackQueue.add(track);
+					// FIXME: if already playing?
+					playTrack(track);
 				} else {
 					Toast.makeText(this, "Material has no audio: " + track, Toast.LENGTH_SHORT).show();
 				}
@@ -176,6 +179,16 @@ public class PlayerService extends Service implements
 		mp.setOnCompletionListener(this);
 		mp.setOnErrorListener(this);
 		return mp;
+	}
+
+	private void playTrack(Material track) {
+		try {
+			mPlayer.setDataSource(track.getAudioFile().getPath());
+			mPlayer.prepare();
+			mPlayer.start();
+		} catch(IOException ex) {
+			Log.e(TAG, ""+ex);
+		}
 	}
 
 	public void playbackStart() {
