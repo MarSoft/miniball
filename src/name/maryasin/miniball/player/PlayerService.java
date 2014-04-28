@@ -282,27 +282,32 @@ public class PlayerService extends Service implements
 		mPlayer.start();
 		updateNotification();
 	}
-	public void playbackStop() {
-		Log.i(TAG, "Stopping playback");
+	private void playbackHalt(boolean stop) {
+		Log.i(TAG, "Halting playback");
 		mPlayer.pause();
-		mPlayer.seekTo(0);
+		if(stop) {
+			mPlayer.seekTo(0);
+		}
 		mAudioManager.setStreamMute(AudioManager.STREAM_RING, false);
 		mAudioManager.abandonAudioFocus(this);
 		updateNotification();
 	}
+	public void playbackStop() {
+		playbackHalt(true);
+	}
 	public void playbackPause() {
-		Log.i(TAG, "Pausing playback");
-		mPlayer.pause();
-		mAudioManager.setStreamMute(AudioManager.STREAM_RING, false);
-		mAudioManager.abandonAudioFocus(this);
-		updateNotification();
+		playbackHalt(false);
 	}
 	public void playbackRestart() {
 		Log.i(TAG, "Restarting track");
+		boolean wasPlaying = mPlayer.isPlaying();
 		mPlayer.pause();
 		mPlayer.seekTo(0);
 		// TODO: configurable delay
-		playbackStart();
+		if(wasPlaying)
+			mPlayer.start();
+		else
+			playbackStart(); // with all needed stream initializations
 	}
 
 	//////////////////////
