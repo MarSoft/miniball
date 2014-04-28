@@ -269,6 +269,9 @@ public class PlayerService extends Service implements
 		Log.i(TAG, "Starting playback");
 		mPlayer.start();
 		mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+		// ? mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+		// TODO: implement unmute
+		//mAudioManager.setStreamMute(AudioManager.STREAM_RING, true);
 		updateNotification();
 	}
 	public void playbackStop() {
