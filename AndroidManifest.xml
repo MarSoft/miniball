@@ -35,6 +35,11 @@
 			android:name="ConfigActivity"
 			android:label="@string/action_settings"></activity>
 
+        <receiver android:name=".player.MediaButtonsReceiver">
+            <intent-filter android:priority="999">
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+            </intent-filter>
+        </receiver>
 		<service
 			android:name="name.maryasin.miniball.player.PlayerService" />
 	</application>
