@@ -113,6 +113,7 @@ public class PlayerService extends Service implements
 			return;
 		}
 
+		Log.d(TAG, "Track loaded? "+isTrackLoaded);
 		if(!isTrackLoaded)
 			return; // ignore all these intents if no track loaded
 
@@ -235,20 +236,21 @@ public class PlayerService extends Service implements
 		}
 		// TODO: current material's image, if present
 		Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-		Notification n = new NotificationCompat.Builder(this)
+		NotificationCompat.Builder b = new NotificationCompat.Builder(this)
 				.setContentTitle(danceName)
 				.setContentText(trackName)
 				.setContentInfo(duration)
-				.setProgress(mPlayer.getDuration(), mPlayer.getCurrentPosition(), false)
 				.setSmallIcon(R.drawable.ic_notif)
 				.setLargeIcon(largeIcon)
 				.setOngoing(true)
-				.setContentIntent(piClick)
-				.addAction(mPlayer.isPlaying() ? R.drawable.ic_action_pause : R.drawable.ic_action_play,
-						getText(mPlayer.isPlaying() ? R.string.action_pause : R.string.action_play), piPause)
-				.addAction(R.drawable.ic_action_stop, getText(R.string.action_stop), piStop)
-				.addAction(R.drawable.ic_action_replay, getText(R.string.action_replay), piReplay)
-				.build();
+				.setContentIntent(piClick);
+		if(ct != null)
+			b.setProgress(mPlayer.getDuration(), mPlayer.getCurrentPosition(), false)
+					.addAction(mPlayer.isPlaying() ? R.drawable.ic_action_pause : R.drawable.ic_action_play,
+							getText(mPlayer.isPlaying() ? R.string.action_pause : R.string.action_play), piPause)
+					.addAction(R.drawable.ic_action_stop, getText(R.string.action_stop), piStop)
+					.addAction(R.drawable.ic_action_replay, getText(R.string.action_replay), piReplay);
+		Notification n = b.build();
 
 		mNotificationUpdateHandler.removeMessages(MSG_UPDATE_NOTIFICATION);
 		if(mPlayer.isPlaying()) {
@@ -275,6 +277,7 @@ public class PlayerService extends Service implements
 	// Operations //
 
 	public void playTrack(Material track) {
+		Log.d(TAG, "playTrack "+track);
 		try {
 			mPlayer.reset();
 			mPlayer.setDataSource(track.getAudioFile().getPath());
