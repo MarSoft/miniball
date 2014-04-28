@@ -278,7 +278,7 @@ public class PlayerService extends Service implements
 			updateRemotePlayState(state,
 					mPlayer.getCurrentPosition());
 		}
-		broadcastStockUpdate(getCurrentTrack());
+		broadcastStockUpdatePlaystate();
 
 		return n;
 	}
@@ -341,13 +341,19 @@ public class PlayerService extends Service implements
 		}
 	}
 
-	private void broadcastStockUpdate(Material track) {
+	private void broadcastStockUpdateMeta(Material track) {
 		if(track == null)
 			return;
-		Intent intent = new Intent("com.android.music.playstatechanged");
+		Intent intent = new Intent("com.android.music.metachanged");
 		intent.putExtra("playing", mPlayer.isPlaying());
 		intent.putExtra("track", track.name);
 		intent.putExtra("album", track.dance.getName());
+		intent.putExtra("duration", mPlayer.getDuration());
+		sendBroadcast(intent);
+	}
+	private void broadcastStockUpdatePlaystate() {
+		Intent intent = new Intent("com.android.music.playstatechanged");
+		intent.putExtra("playing", mPlayer.isPlaying());
 		intent.putExtra("duration", mPlayer.getDuration());
 		sendBroadcast(intent);
 	}
@@ -369,7 +375,7 @@ public class PlayerService extends Service implements
 			} else {
 				updateRemote(track);
 			}
-			broadcastStockUpdate(track);
+			broadcastStockUpdateMeta(track);
 		} catch(IOException ex) {
 			Log.e(TAG, ""+ex);
 		}
