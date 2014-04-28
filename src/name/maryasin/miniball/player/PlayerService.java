@@ -6,6 +6,7 @@ import name.maryasin.miniball.R;
 import android.app.*;
 import android.content.Intent;
 import android.os.*;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -53,17 +54,18 @@ public class PlayerService extends Service {
 
 	private void showNotification() {
 		// TODO
-		Notification n = new Notification.Builder(this)
+		PendingIntent pi = PendingIntent.getActivity(
+				this, 0,
+				new Intent(this, DanceListActivity.class),
+				0);
+		Notification n = new NotificationCompat.Builder(this)
 				.setContentTitle(getText(R.string.app_name))
 				.setContentText("Hello World")
 				.setSmallIcon(R.drawable.ic_notif)
 				//.setLargeIcon(R.drawable.ic_player_large) // TODO: current material's image, if present
 				.setOngoing(true)
+				.setContentIntent(pi)
 				.build();
-		PendingIntent pi = PendingIntent.getActivity(
-				this, 0,
-				new Intent(this, DanceListActivity.class),
-				0);
 		notificationMgr.notify(NOTIFICATION_ID, n);
 	}
 
