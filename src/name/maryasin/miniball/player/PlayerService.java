@@ -27,6 +27,9 @@ public class PlayerService extends Service implements
 	// Constants //
 
 	public static final String ACTION_ENQUEUE = "name.maryasin.miniball.action.ENQUEUE";
+	public static final String ACTION_PLAY = "name.maryasin.miniball.action.PLAY";
+	public static final String ACTION_PAUSE = "name.maryasin.miniball.action.PAUSE";
+	/** Stop means Pause and seek to beginning */
 	public static final String ACTION_STOP = "name.maryasin.miniball.action.STOP";
 	public static final String ACTION_REPLAY = "name.maryasin.miniball.action.REPLAY";
 
@@ -94,6 +97,10 @@ public class PlayerService extends Service implements
 				} else {
 					Toast.makeText(this, "Material has no audio: " + track, Toast.LENGTH_SHORT).show();
 				}
+			} else if(ACTION_PLAY.equals(action)) {
+				playbackStart();
+			} else if(ACTION_PAUSE.equals(action)) {
+				playbackPause();
 			} else if(ACTION_STOP.equals(action)) {
 				playbackStop();
 			} else if(ACTION_REPLAY.equals(action)) {
@@ -200,22 +207,25 @@ public class PlayerService extends Service implements
 			Log.e(TAG, ""+ex);
 		}
 	}
-
 	public void playbackStart() {
 		Log.i(TAG, "Starting playback");
 		mPlayer.start();
 		updateNotification();
 	}
-
 	public void playbackStop() {
 		Log.i(TAG, "Stopping playback");
-		mPlayer.stop();
+		mPlayer.pause();
+		mPlayer.seekTo(0);
 		updateNotification();
 	}
-
+	public void playbackPause() {
+		Log.i(TAG, "Pausing playback");
+		mPlayer.pause();
+		updateNotification();
+	}
 	public void playbackRestart() {
 		Log.i(TAG, "Restarting track");
-		mPlayer.stop();
+		mPlayer.pause();
 		mPlayer.seekTo(0);
 		// TODO: configurable delay
 		mPlayer.start();
