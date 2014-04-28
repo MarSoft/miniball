@@ -2,6 +2,7 @@ package name.maryasin.miniball.player;
 
 import name.maryasin.miniball.DanceListActivity;
 import name.maryasin.miniball.R;
+import name.maryasin.miniball.data.DataManager;
 import name.maryasin.miniball.data.Material;
 
 import android.app.*;
@@ -71,7 +72,8 @@ public class PlayerService extends Service implements
 		if(intent != null) {
 			String action = intent.getAction();
 			if(ACTION_ENQUEUE.equals(action)) {
-				Uri track = intent.getData();
+				Uri trackUri = intent.getData();
+				Material track = DataManager.getMaterialFromUri(trackUri);
 				Log.i(TAG, "Enqueue track: "+track);
 			} else if(ACTION_STOP.equals(action)) {
 				Log.i(TAG, "Stop playback");
