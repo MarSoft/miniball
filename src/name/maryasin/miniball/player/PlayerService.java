@@ -55,6 +55,7 @@ public class PlayerService extends Service implements
 
 	private AudioManager mAudioManager;
 	private MediaPlayer mPlayer;
+	private boolean isTrackLoaded = false;
 
 	private Handler mNotificationUpdateHandler = new Handler(this);
 
@@ -109,7 +110,13 @@ public class PlayerService extends Service implements
 			} else {
 				Toast.makeText(this, "Material has no audio: " + track, Toast.LENGTH_SHORT).show();
 			}
-		} else if(ACTION_PLAY.equals(action)) {
+			return;
+		}
+
+		if(!isTrackLoaded)
+			return; // ignore all these intents if no track loaded
+
+		if(ACTION_PLAY.equals(action)) {
 			playbackStart();
 		} else if(ACTION_PAUSE.equals(action)) {
 			playbackPause();
@@ -272,6 +279,7 @@ public class PlayerService extends Service implements
 			mPlayer.reset();
 			mPlayer.setDataSource(track.getAudioFile().getPath());
 			mPlayer.prepare();
+			isTrackLoaded = true;
 			playbackStart();
 		} catch(IOException ex) {
 			Log.e(TAG, ""+ex);
