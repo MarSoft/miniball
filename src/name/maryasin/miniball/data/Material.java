@@ -37,7 +37,7 @@ public class Material implements Comparable<Material> {
 	}
 
 	public Uri getUri() {
-		return Uri.fromParts("material", dance+"/"+name, null);
+		return Uri.parse("material:"+dance+"/"+name);
 	}
 	
 	@Override
