@@ -5,13 +5,15 @@ import name.maryasin.miniball.R;
 
 import android.app.*;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.*;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
-public class PlayerService extends Service {
+public class PlayerService extends Service implements
+		MediaPlayer.OnCompletionListener {
 	public static final String ACTION_ENQUEUE = "name.maryasin.miniball.action.ENQUEUE";
 	public static final String ACTION_STOP = "name.maryasin.miniball.action.STOP";
 
@@ -64,6 +66,17 @@ public class PlayerService extends Service {
 		// We don't support binding
 		return null;
 	}
+
+	////////////////////////
+	// Listener callbacks //
+
+	@Override
+	public void onCompletion(MediaPlayer mp) {
+		// TODO
+	}
+
+	/////////////////////
+	// Private methods //
 
 	/**
 	 * Construct a notification adequate with current state.
