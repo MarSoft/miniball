@@ -234,9 +234,9 @@ public class PlayerService extends Service implements
 				.addAction(R.drawable.ic_action_replay, getText(R.string.action_replay), piReplay)
 				.build();
 
+		mNotificationUpdateHandler.removeMessages(MSG_UPDATE_NOTIFICATION);
 		if(mPlayer.isPlaying()) {
 			// schedule notification update
-			mNotificationUpdateHandler.removeMessages(MSG_UPDATE_NOTIFICATION);
 			mNotificationUpdateHandler.sendEmptyMessageDelayed(MSG_UPDATE_NOTIFICATION,
 					1050 - mPlayer.getCurrentPosition() % 1000); // update after position changes
 		}
