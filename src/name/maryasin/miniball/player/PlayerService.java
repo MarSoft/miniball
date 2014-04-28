@@ -392,7 +392,7 @@ public class PlayerService extends Service implements
 			return;
 		}
 		// ? mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
-		mAudioManager.setStreamMute(AudioManager.STREAM_RING, true);
+		mAudioManager.setStreamSolo(AudioManager.STREAM_MUSIC, true);
 		mPlayer.start();
 		updateNotification();
 	}
@@ -402,7 +402,7 @@ public class PlayerService extends Service implements
 		if(stop) {
 			mPlayer.seekTo(0);
 		}
-		mAudioManager.setStreamMute(AudioManager.STREAM_RING, false);
+		mAudioManager.setStreamSolo(AudioManager.STREAM_MUSIC, false);
 		mAudioManager.abandonAudioFocus(this);
 		updateNotification();
 		if(stop)
