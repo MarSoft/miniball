@@ -43,10 +43,10 @@ public class PlayerService extends Service {
 		Log.i(TAG, "Received start id "+startId+": "+intent);
 		if(intent != null) {
 			String action = intent.getAction();
-			if(action.equals(ACTION_ENQUEUE)) {
+			if(ACTION_ENQUEUE.equals(action)) {
 				Uri track = intent.getData();
 				Log.i(TAG, "Enqueue track: "+track);
-			} else if(action.equals(ACTION_STOP)) {
+			} else if(ACTION_STOP.equals(action)) {
 				Log.i(TAG, "Stop playback");
 			} else {
 				Log.w(TAG, "Unknown action: "+action);
