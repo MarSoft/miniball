@@ -152,7 +152,10 @@ public class DataManager {
 		String name = uri.getHost();
 		if(!aliasMap.containsKey(name))
 			throw new IllegalArgumentException("No such dance or alias: " + name);
-		return aliasMap.get(name).getReferringDance();
+		Alias a = aliasMap.get(name);
+		if(a instanceof Dance)
+			return (Dance)a;
+		return a.getReferringDance(); // may throw IllegalStateException if too many links
 	}
 
 	public static Material getMaterialFromUri(Uri uri)
