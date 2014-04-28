@@ -33,6 +33,7 @@ public class PlayerService extends Service implements
 	public static final String ACTION_ENQUEUE = "name.maryasin.miniball.action.ENQUEUE";
 	public static final String ACTION_PLAY = "name.maryasin.miniball.action.PLAY";
 	public static final String ACTION_PAUSE = "name.maryasin.miniball.action.PAUSE";
+	public static final String ACTION_PLAYPAUSE = "name.maryasin.miniball.action.PLAYPAUSE";
 	/** Stop means Pause and seek to beginning */
 	public static final String ACTION_STOP = "name.maryasin.miniball.action.STOP";
 	public static final String ACTION_REPLAY = "name.maryasin.miniball.action.REPLAY";
@@ -111,6 +112,11 @@ public class PlayerService extends Service implements
 				playbackStart();
 			} else if(ACTION_PAUSE.equals(action)) {
 				playbackPause();
+			} else if(ACTION_PLAYPAUSE.equals(action)) {
+				if(mPlayer.isPlaying())
+					playbackPause();
+				else
+					playbackStart();
 			} else if(ACTION_STOP.equals(action)) {
 				playbackStop();
 			} else if(ACTION_REPLAY.equals(action)) {
@@ -201,8 +207,7 @@ public class PlayerService extends Service implements
 				new Intent(this, DanceListActivity.class), // FIXME: use PlayerActivity
 				0);
 		PendingIntent piPause = PendingIntent.getService(this, 0,
-				new Intent(mPlayer.isPlaying() ? ACTION_PAUSE : ACTION_PLAY,
-						null, this, PlayerService.class), 0);
+				new Intent(ACTION_PLAYPAUSE, null, this, PlayerService.class), 0);
 		PendingIntent piStop = PendingIntent.getService(this, 0,
 				new Intent(ACTION_STOP, null, this, PlayerService.class), 0);
 		PendingIntent piReplay = PendingIntent.getService(this, 0,
