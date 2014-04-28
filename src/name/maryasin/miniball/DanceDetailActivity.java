@@ -7,7 +7,7 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.NavUtils;
 import android.view.MenuItem;
 import name.maryasin.miniball.R;
-import name.maryasin.miniball.data.Settings;
+import name.maryasin.miniball.util.Settings;
 
 /**
  * An activity representing a single Dance detail screen. This activity is only

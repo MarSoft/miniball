@@ -14,20 +14,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 import name.maryasin.miniball.R;
-import name.maryasin.miniball.data.DataManager;
-import name.maryasin.miniball.data.DataManager.Material;
+import name.maryasin.miniball.data.*;
+import name.maryasin.miniball.player.PlayerService;
 
 /**
  * A fragment representing a single Dance detail screen. This fragment is either
  * contained in a {@link DanceListActivity} in two-pane mode (on tablets) or a
  * {@link DanceDetailActivity} on handsets.
  */
-public class DanceDetailFragment extends Fragment implements OnItemClickListener {
+public class DanceDetailFragment extends Fragment
+   		implements OnItemClickListener, OnItemLongClickListener {
 	/**
 	 * The fragment argument representing the name of dance that this fragment
 	 * represents.
@@ -40,8 +42,8 @@ public class DanceDetailFragment extends Fragment implements OnItemClickListener
 	/**
 	 * The dance this fragment is presenting.
 	 */
-	private DataManager.Dance mDance;
-	private List<DataManager.Material> mMaterialList;
+	private Dance mDance;
+	private List<Material> mMaterialList;
 
 	/**
 	 * Mandatory empty constructor for the fragment manager to instantiate the
@@ -95,7 +97,7 @@ public class DanceDetailFragment extends Fragment implements OnItemClickListener
 			getActivity().setTitle(mDance.getName()); // FIXME: а что будет в планшетном режиме?
 			mMaterialList = mDance.findMaterials(null, true);
 			((ListView) rootView.findViewById(R.id.material_audio_list))
-					.setAdapter(new ArrayAdapter<DataManager.Material>(
+					.setAdapter(new ArrayAdapter<Material>(
 							getActivity(),
 							android.R.layout.simple_list_item_1,
 							android.R.id.text1,
@@ -122,6 +124,8 @@ public class DanceDetailFragment extends Fragment implements OnItemClickListener
 		}
 		((ListView) rootView.findViewById(R.id.material_audio_list))
 			.setOnItemClickListener(this);
+		((ListView) rootView.findViewById(R.id.material_audio_list))
+			.setOnItemLongClickListener(this);
 
 		return rootView;
 	}
@@ -129,8 +133,19 @@ public class DanceDetailFragment extends Fragment implements OnItemClickListener
 	@Override
 	public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
 		Material m = mMaterialList.get(pos);
+		Intent i = new Intent(getActivity(), PlayerService.class);
+		i.setAction(PlayerService.ACTION_ENQUEUE);
+		i.setData(m.getUri());
+		getActivity().startService(i);
+	}
+
+	@Override
+	public boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id) {
+		// Launch track in external player on long click
+		Material m = mMaterialList.get(pos);
 		Intent i = new Intent(Intent.ACTION_VIEW);
 		i.setDataAndType(Uri.fromFile(m.getAudioFile()), "audio/*");
 		startActivity(i);
+		return true;
 	}
 }

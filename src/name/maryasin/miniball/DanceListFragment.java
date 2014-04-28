@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import name.maryasin.miniball.data.DataManager;
-import name.maryasin.miniball.data.DataManager.Alias;
-import name.maryasin.miniball.data.DataManager.Dance;
-import name.maryasin.miniball.data.DataManager.Query;
+import name.maryasin.miniball.data.*;
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
@@ -36,9 +33,9 @@ public class DanceListFragment extends ListFragment
 	public static final String ARG_TWOPANE = "two_pane";
 	
 	/** Текущий запрос к списку танцев (TODO: в заголовок его) */
-	private DataManager.Query query;
+	private Query query;
 	/** Список танцев (и псевдонимов!), отображаемый в activity */
-	private List<DataManager.Alias> danceList;
+	private List<Alias> danceList;
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -107,7 +104,7 @@ public class DanceListFragment extends ListFragment
 			query = Query.deserialize(
 					getArguments().getStringArray(ARG_TAGS_FILTER));
 		} else { // если ничего не указано
-			query = new DataManager.Query(); // создаём пустой запрос
+			query = new Query(); // создаём пустой запрос
 		}
 		if(!DataManager.isDanceListInitialized())
 			try {
@@ -123,7 +120,7 @@ public class DanceListFragment extends ListFragment
 			danceList = DataManager.findAliases(query);
 		else
 			danceList = Collections.emptyList();
-		setListAdapter(new ArrayAdapter<DataManager.Alias>(getActivity(),
+		setListAdapter(new ArrayAdapter<Alias>(getActivity(),
 				android.R.layout.simple_list_item_activated_1,
 				android.R.id.text1, danceList));
 	}

@@ -34,6 +34,9 @@
 		<activity
 			android:name="ConfigActivity"
 			android:label="@string/action_settings"></activity>
+
+		<service
+			android:name="name.maryasin.miniball.player.PlayerService" />
 	</application>
 
 </manifest>
