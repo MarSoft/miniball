@@ -3,6 +3,7 @@ package name.maryasin.miniball.data;
 import java.io.*;
 import java.util.*;
 
+import android.net.Uri;
 import android.util.Log;
 
 import name.maryasin.miniball.util.Settings;
@@ -125,5 +126,42 @@ public class DataManager {
 		Collections.sort(ret);
 		aliasSearchCache.put(q, ret); // запоминаем результат на будущее
 		return ret;
+	}
+
+	//////////////////
+	// URI handling //
+
+	private static boolean validateUri(Uri uri) {
+		if(uri.getScheme() != "miniball")
+			return false;
+		return true;
+	}
+
+	/**
+	 * Returns dance for given URI.
+	 * Uri itself may link to material or alias.
+	 * @param uri
+	 * @return
+	 */
+	public static Dance getDanceFromUri(Uri uri)
+			throws IllegalArgumentException {
+		if(!validateUri(uri))
+			throw new IllegalArgumentException("Bad uri: " + uri);
+		String name = uri.getPathSegments().get(0);
+		if(!aliasMap.containsKey(name))
+			throw new IllegalArgumentException("No such dance or alias: " + name);
+		return aliasMap.get(name).getReferringDance();
+	}
+
+	public static Material getMaterialFromUri(Uri uri)
+			throws IllegalArgumentException {
+		List<String> ps = uri.getPathSegments();
+		if(ps.size() != 2)
+			throw new IllegalArgumentException("Not a material uri: " + uri);
+		String mname = ps.get(1);
+		Dance d = getDanceFromUri(uri);
+		if(!d.getMaterials().containsKey(mname))
+			throw new IllegalArgumentException("No such material: " + mname + " in dance "+d);
+		return d.getMaterials().get(mname);
 	}
 }
