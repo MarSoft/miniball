@@ -28,6 +28,7 @@ public class PlayerService extends Service implements
 
 	public static final String ACTION_ENQUEUE = "name.maryasin.miniball.action.ENQUEUE";
 	public static final String ACTION_STOP = "name.maryasin.miniball.action.STOP";
+	public static final String ACTION_RESTART = "name.maryasin.miniball.action.RESTART";
 
 	private static final int NOTIFICATION_ID = 1;
 
@@ -94,7 +95,9 @@ public class PlayerService extends Service implements
 					Toast.makeText(this, "Material has no audio: " + track, Toast.LENGTH_SHORT).show();
 				}
 			} else if(ACTION_STOP.equals(action)) {
-				Log.i(TAG, "Stop playback");
+				playbackStop();
+			} else if(ACTION_RESTART.equals(action)) {
+				playbackRestart();
 			} else {
 				Log.w(TAG, "Unknown action: "+action);
 			}
@@ -198,12 +201,23 @@ public class PlayerService extends Service implements
 	}
 
 	public void playbackStart() {
+		Log.i(TAG, "Starting playback");
 		mPlayer.start();
 		updateNotification();
 	}
 
 	public void playbackStop() {
+		Log.i(TAG, "Stopping playback");
 		mPlayer.stop();
+		updateNotification();
+	}
+
+	public void playbackRestart() {
+		Log.i(TAG, "Restarting track");
+		mPlayer.stop();
+		mPlayer.seekTo(0);
+		// TODO: configurable delay
+		mPlayer.start();
 		updateNotification();
 	}
 }
