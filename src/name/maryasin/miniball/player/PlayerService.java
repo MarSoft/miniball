@@ -322,6 +322,10 @@ public class PlayerService extends Service implements
 
 		e.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, track.dance.getName());
 		e.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, track.name);
+		if(track.hasImage()) {
+			Bitmap b = BitmapFactory.decodeFile(track.getImageFile().getPath());
+			e.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, b);
+		}
 
 		e.apply();
 	}
