@@ -81,6 +81,7 @@ public class PlayerService extends Service implements
 
 		if(mPlayer != null) {
 			// TODO: save position?
+			playbackStop(); // release any audio locks
 			mPlayer.release();
 			mPlayer = null;
 		}
