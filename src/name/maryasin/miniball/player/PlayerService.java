@@ -19,7 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PlayerService extends Service implements
-		MediaPlayer.OnCompletionListener {
+		MediaPlayer.OnCompletionListener,
+		MediaPlayer.OnErrorListener {
 
 	///////////////
 	// Constants //
@@ -116,6 +117,12 @@ public class PlayerService extends Service implements
 		// TODO
 	}
 
+	@Override
+	public boolean onError(MediaPlayer mp, int what, int extra) {
+		Log.e(TAG, "MediaPlayer error: "+what+", "+extra);
+		return true; // yes, we processed this error
+	}
+
 	/////////////////////////////////////////
 	// Inter-process communication methods //
 
@@ -167,6 +174,7 @@ public class PlayerService extends Service implements
 		MediaPlayer mp = new MediaPlayer();
 		mp.setAudioStreamType(AudioManager.STREAM_MUSIC);
 		mp.setOnCompletionListener(this);
+		mp.setOnErrorListener(this);
 		return mp;
 	}
 
