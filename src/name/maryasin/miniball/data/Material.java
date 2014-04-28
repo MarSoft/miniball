@@ -37,7 +37,7 @@ public class Material implements Comparable<Material> {
 	}
 
 	public Uri getUri() {
-		return Uri.parse("material:"+dance+"/"+name);
+		return Uri.withAppendedPath(dance.getUri(), name);
 	}
 	
 	@Override

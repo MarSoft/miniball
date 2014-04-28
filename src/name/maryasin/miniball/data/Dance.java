@@ -3,6 +3,7 @@ package name.maryasin.miniball.data;
 import java.io.*;
 import java.util.*;
 
+import android.net.Uri;
 import android.util.Log;
 
 /**
@@ -153,6 +154,10 @@ public class Dance extends Alias {
 		Collections.sort(ret);
 		materialSearchCache.put(q, ret);
 		return ret;
+	}
+
+	public Uri getUri() {
+		return Uri.fromParts("miniball", getName(), null);
 	}
 	
 	/**
