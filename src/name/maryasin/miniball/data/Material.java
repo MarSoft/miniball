@@ -3,6 +3,7 @@ package name.maryasin.miniball.data;
 import java.io.*;
 import java.util.*;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.util.Log;
 
@@ -28,6 +29,9 @@ public class Material implements Comparable<Material> {
 	public File getAudioFile() {
 		return audioFile;
 	}
+
+	public boolean hasImage() { return false; } // TODO
+	public File getImageFile() { return null; } // TODO
 	
 	/*package*/ void addTag(String tag) {
 		tags.add(tag);
