@@ -269,11 +269,12 @@ public class PlayerService extends Service implements
 		}
 
 		if(mRemote != null) {
-			updateRemotePlayState(mPlayer.isPlaying() ?
+			int state = mPlayer.isPlaying() ?
 					RemoteControlClient.PLAYSTATE_PLAYING :
 					mPlayer.getCurrentPosition() > 0 ?
-					RemoteControlClient.PLAYSTATE_PAUSED :
-					RemoteControlClient.PLAYSTATE_STOPPED,
+							RemoteControlClient.PLAYSTATE_PAUSED :
+							RemoteControlClient.PLAYSTATE_STOPPED;
+			updateRemotePlayState(state,
 					mPlayer.getCurrentPosition());
 		}
 
@@ -326,8 +327,12 @@ public class PlayerService extends Service implements
 	}
 	@TargetApi(18)
 	private void updateRemotePlayState(int newState, long time) {
-		if(mRemote != null)
-			mRemote.setPlaybackState(newState, time, 1);
+		if(mRemote != null) {
+			if (Build.VERSION.SDK_INT >= 18)
+				mRemote.setPlaybackState(newState, time, 1);
+			else
+				mRemote.setPlaybackState(newState);
+		}
 	}
 
 	////////////////
