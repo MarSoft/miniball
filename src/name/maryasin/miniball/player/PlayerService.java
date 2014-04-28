@@ -182,7 +182,8 @@ public class PlayerService extends Service implements
 		if(ct != null) {
 			trackName = ct.name;
 			danceName = ct.dance.getName();
-			duration = positionToStr(mPlayer.getDuration());
+			duration = positionToStr(mPlayer.getCurrentPosition()) + " / " +
+					positionToStr(mPlayer.getDuration());
 		}
 		// TODO: current material's image, if present
 		Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
@@ -190,6 +191,7 @@ public class PlayerService extends Service implements
 				.setContentTitle(danceName)
 				.setContentText(trackName)
 				.setContentInfo(duration)
+				.setProgress(mPlayer.getDuration(), mPlayer.getCurrentPosition(), false)
 				.setSmallIcon(R.drawable.ic_notif)
 				.setLargeIcon(largeIcon)
 				.setOngoing(true)
