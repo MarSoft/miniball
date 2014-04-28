@@ -23,7 +23,8 @@ import java.util.List;
 
 public class PlayerService extends Service implements
 		MediaPlayer.OnCompletionListener,
-		MediaPlayer.OnErrorListener {
+		MediaPlayer.OnErrorListener,
+		Handler.Callback {
 
 	///////////////
 	// Constants //
@@ -36,6 +37,7 @@ public class PlayerService extends Service implements
 	public static final String ACTION_REPLAY = "name.maryasin.miniball.action.REPLAY";
 
 	private static final int NOTIFICATION_ID = 1;
+	private static final int MSG_UPDATE_NOTIFICATION = 1;
 
 	public static final String TAG = "PlayerService";
 
@@ -51,13 +53,14 @@ public class PlayerService extends Service implements
 
 	private MediaPlayer mPlayer;
 
+	private Handler mNotificationUpdateHandler = new Handler(this);
+
 	///////////////////////
 	// Service callbacks //
 
 	@Override
 	public void onCreate() {
 		sInstance = this;
-
 		notificationMgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
 		mPlayer = createMediaPlayer();
@@ -139,6 +142,15 @@ public class PlayerService extends Service implements
 		return true; // yes, we processed this error
 	}
 
+	@Override
+	public boolean handleMessage(Message msg) {
+		if(msg.what == MSG_UPDATE_NOTIFICATION) {
+			updateNotification();
+			return true;
+		}
+		return false;
+	}
+
 	/////////////////////////////////////////
 	// Inter-process communication methods //
 
@@ -201,6 +213,14 @@ public class PlayerService extends Service implements
 				.addAction(R.drawable.ic_action_stop, getText(R.string.action_stop), piStop)
 				.addAction(R.drawable.ic_action_replay, getText(R.string.action_replay), piReplay)
 				.build();
+
+		if(mPlayer.isPlaying()) {
+			// schedule notification update
+			mNotificationUpdateHandler.removeMessages(MSG_UPDATE_NOTIFICATION);
+			mNotificationUpdateHandler.sendEmptyMessageDelayed(MSG_UPDATE_NOTIFICATION,
+					1050 - mPlayer.getCurrentPosition() % 1000); // update after position changes
+		}
+
 		return n;
 	}
 	private void updateNotification() {
