@@ -166,7 +166,7 @@ public class PlayerService extends Service implements
 				// ignore and keep playing
 				break;
 			case AudioManager.AUDIOFOCUS_GAIN:
-				playbackStart(); // FIXME: only if was not paused
+				playbackStart(); // FIXME: only if was not paused by user
 				break;
 		}
 	}
@@ -255,7 +255,10 @@ public class PlayerService extends Service implements
 		return mp;
 	}
 
-	private void playTrack(Material track) {
+	////////////////
+	// Operations //
+
+	public void playTrack(Material track) {
 		try {
 			mPlayer.reset();
 			mPlayer.setDataSource(track.getAudioFile().getPath());
