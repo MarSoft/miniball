@@ -178,16 +178,18 @@ public class PlayerService extends Service implements
 		Material ct = getCurrentTrack();
 		String trackName = "<No track loaded>";
 		String danceName = "<No dance loaded>";
+		String duration = "0:00";
 		if(ct != null) {
 			trackName = ct.name;
 			danceName = ct.dance.getName();
+			duration = positionToStr(mPlayer.getDuration());
 		}
 		// TODO: current material's image, if present
 		Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
 		Notification n = new NotificationCompat.Builder(this)
 				.setContentTitle(danceName)
 				.setContentText(trackName)
-				//.setContentInfo(mPlayer.isPlaying() ? "|>" : "[]")
+				.setContentInfo(duration)
 				.setSmallIcon(R.drawable.ic_notif)
 				.setLargeIcon(largeIcon)
 				.setOngoing(true)
@@ -249,6 +251,9 @@ public class PlayerService extends Service implements
 	//////////////////////
 	// Helper functions //
 
+	/**
+	 * Convert milliseconds to "H:M:S" string
+	 */
 	public String positionToStr(int millis) {
 		millis /= 1000;
 		int s = millis % 60;
@@ -260,7 +265,7 @@ public class PlayerService extends Service implements
 		if(h > 0) buf.append(String.format("%02d:", h));
 		if(m > 0) buf.append(String.format("%02d:", m));
 		buf.append(String.format("%02d", s));
-		
+
 		return buf.toString();
 	}
 }
