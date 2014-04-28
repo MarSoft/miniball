@@ -267,22 +267,29 @@ public class PlayerService extends Service implements
 	}
 	public void playbackStart() {
 		Log.i(TAG, "Starting playback");
-		mPlayer.start();
-		mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+		int focusresult = mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+		if(focusresult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+			Toast.makeText(this, "Audio focus request failed!", Toast.LENGTH_SHORT);
+			return;
+		}
+		//mAudioManager.registerMediaButtonEventReceiver(this);
 		// ? mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
 		// TODO: implement unmute
 		//mAudioManager.setStreamMute(AudioManager.STREAM_RING, true);
+		mPlayer.start();
 		updateNotification();
 	}
 	public void playbackStop() {
 		Log.i(TAG, "Stopping playback");
 		mPlayer.pause();
 		mPlayer.seekTo(0);
+		mAudioManager.abandonAudioFocus(this);
 		updateNotification();
 	}
 	public void playbackPause() {
 		Log.i(TAG, "Pausing playback");
 		mPlayer.pause();
+		mAudioManager.abandonAudioFocus(this);
 		updateNotification();
 	}
 	public void playbackRestart() {
@@ -290,8 +297,7 @@ public class PlayerService extends Service implements
 		mPlayer.pause();
 		mPlayer.seekTo(0);
 		// TODO: configurable delay
-		mPlayer.start();
-		updateNotification();
+		playbackStart();
 	}
 
 	//////////////////////
