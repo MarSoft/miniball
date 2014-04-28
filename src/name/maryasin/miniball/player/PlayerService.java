@@ -69,6 +69,7 @@ public class PlayerService extends Service implements
 
 	@Override
 	public void onCreate() {
+		Log.d(TAG, "onCreate()");
 		sInstance = this;
 		notificationMgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
@@ -85,10 +86,7 @@ public class PlayerService extends Service implements
 
 	@Override
 	public void onDestroy() {
-		// hide persistent notification
-		notificationMgr.cancel(NOTIFICATION_ID);
-		// and to really remove notification created by startForeground:
-		stopForeground(true);
+		Log.d(TAG, "onDestroy()");
 
 		unregisterRemote();
 
@@ -98,6 +96,13 @@ public class PlayerService extends Service implements
 			mPlayer.release();
 			mPlayer = null;
 		}
+
+		// cancel any pending notification updates
+		mNotificationUpdateHandler.removeMessages(MSG_UPDATE_NOTIFICATION);
+		// hide persistent notification
+		notificationMgr.cancel(NOTIFICATION_ID);
+		// and to really remove notification created by startForeground:
+		stopForeground(true);
 
 		// Debug, FIXME
 		Toast.makeText(this, "PlayerService stopped", Toast.LENGTH_SHORT).show();
@@ -122,7 +127,6 @@ public class PlayerService extends Service implements
 			return;
 		}
 
-		Log.d(TAG, "Track loaded? "+isTrackLoaded);
 		if(!isTrackLoaded)
 			return; // ignore all these intents if no track loaded
 
@@ -260,6 +264,8 @@ public class PlayerService extends Service implements
 							getText(mPlayer.isPlaying() ? R.string.action_pause : R.string.action_play), piPause)
 					.addAction(R.drawable.ic_action_stop, getText(R.string.action_stop), piStop)
 					.addAction(R.drawable.ic_action_replay, getText(R.string.action_replay), piReplay);
+		else
+			b.addAction(R.drawable.ic_action_stop, getText(R.string.action_stop), piStop);
 		Notification n = b.build();
 
 		mNotificationUpdateHandler.removeMessages(MSG_UPDATE_NOTIFICATION);
@@ -412,6 +418,7 @@ public class PlayerService extends Service implements
 		if(mPlayer.isPlaying()) {
 			playbackHalt(true);
 		} else {
+			Log.d(TAG, "Terminating service");
 			stopSelf();
 		}
 	}
