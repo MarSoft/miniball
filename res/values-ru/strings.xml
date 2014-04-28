@@ -2,4 +2,5 @@
 <resources>
 	<string name="action_settings">Настройки</string>
 	<string name="cfg_root_path">Корневой каталог</string>
+    <string name="action_next">Следующий</string>
 </resources>

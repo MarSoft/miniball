@@ -81,7 +81,7 @@ public class PlayerService extends Service {
 				//.setLargeIcon(R.drawable.ic_player_large) // TODO: current material's image, if present
 				.setOngoing(true)
 				.setContentIntent(piClick)
-				.addAction(R.drawable.ic_action_next, null, piNext)
+				.addAction(R.drawable.ic_action_next, getText(R.string.action_next), piNext)
 				.build();
 		notificationMgr.notify(NOTIFICATION_ID, n);
 	}
