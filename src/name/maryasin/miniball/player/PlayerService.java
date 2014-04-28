@@ -5,12 +5,16 @@ import name.maryasin.miniball.R;
 import name.maryasin.miniball.data.DataManager;
 import name.maryasin.miniball.data.Material;
 
+import android.annotation.TargetApi;
 import android.app.*;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.AudioManager;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
+import android.media.RemoteControlClient;
 import android.net.Uri;
 import android.os.*;
 import android.support.v4.app.NotificationCompat;
@@ -24,6 +28,7 @@ import java.util.List;
 public class PlayerService extends Service implements
 		MediaPlayer.OnCompletionListener,
 		MediaPlayer.OnErrorListener,
+		AudioManager.OnAudioFocusChangeListener,
 		Handler.Callback {
 
 	///////////////
@@ -32,6 +37,7 @@ public class PlayerService extends Service implements
 	public static final String ACTION_ENQUEUE = "name.maryasin.miniball.action.ENQUEUE";
 	public static final String ACTION_PLAY = "name.maryasin.miniball.action.PLAY";
 	public static final String ACTION_PAUSE = "name.maryasin.miniball.action.PAUSE";
+	public static final String ACTION_PLAYPAUSE = "name.maryasin.miniball.action.PLAYPAUSE";
 	/** Stop means Pause and seek to beginning */
 	public static final String ACTION_STOP = "name.maryasin.miniball.action.STOP";
 	public static final String ACTION_REPLAY = "name.maryasin.miniball.action.REPLAY";
@@ -51,7 +57,10 @@ public class PlayerService extends Service implements
 
 	private List<Material> playbackQueue = new ArrayList<Material>();
 
+	private AudioManager mAudioManager;
 	private MediaPlayer mPlayer;
+	private RemoteControlClient mRemote;
+	private boolean isTrackLoaded = false;
 
 	private Handler mNotificationUpdateHandler = new Handler(this);
 
@@ -64,6 +73,11 @@ public class PlayerService extends Service implements
 		notificationMgr = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
 		mPlayer = createMediaPlayer();
+		mAudioManager = (AudioManager)getSystemService(AUDIO_SERVICE);
+
+		registerRemote();
+
+		// TODO: restore saved track&position
 
 		// start service as foreground, and show persistent notification
 		startForeground(NOTIFICATION_ID, createNotification());
@@ -76,8 +90,11 @@ public class PlayerService extends Service implements
 		// and to really remove notification created by startForeground:
 		stopForeground(true);
 
+		unregisterRemote();
+
 		if(mPlayer != null) {
 			// TODO: save position?
+			playbackStop(); // release any audio locks
 			mPlayer.release();
 			mPlayer = null;
 		}
@@ -86,37 +103,50 @@ public class PlayerService extends Service implements
 		Toast.makeText(this, "PlayerService stopped", Toast.LENGTH_SHORT).show();
 	}
 
+	private void handleIntent(Intent intent) {
+		if(intent == null)
+			return;
+		String action = intent.getAction();
+		if(ACTION_ENQUEUE.equals(action)) {
+			Uri trackUri = intent.getData();
+			Material track = DataManager.getMaterialFromUri(trackUri);
+			if(track.hasAudio()) {
+				Log.i(TAG, "Enqueue track: " + track);
+				// FIXME: do enqueue, not just play
+				playbackQueue.clear();
+				playbackQueue.add(track);
+				playTrack(track);
+			} else {
+				Toast.makeText(this, "Material has no audio: " + track, Toast.LENGTH_SHORT).show();
+			}
+			return;
+		}
+
+		Log.d(TAG, "Track loaded? "+isTrackLoaded);
+		if(!isTrackLoaded)
+			return; // ignore all these intents if no track loaded
+
+		if(ACTION_PLAY.equals(action)) {
+			playbackStart();
+		} else if(ACTION_PAUSE.equals(action)) {
+			playbackPause();
+		} else if(ACTION_PLAYPAUSE.equals(action)) {
+			if(mPlayer.isPlaying())
+				playbackPause();
+			else
+				playbackStart();
+		} else if(ACTION_STOP.equals(action)) {
+			playbackStop();
+		} else if(ACTION_REPLAY.equals(action)) {
+			playbackRestart();
+		} else {
+			Log.w(TAG, "Unknown action: "+action);
+		}
+	}
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.i(TAG, "Received start id "+startId+": "+intent);
-		if(intent != null) {
-			String action = intent.getAction();
-			if(ACTION_ENQUEUE.equals(action)) {
-				Uri trackUri = intent.getData();
-				Material track = DataManager.getMaterialFromUri(trackUri);
-				if(track.hasAudio()) {
-					Log.i(TAG, "Enqueue track: " + track);
-					// FIXME: do enqueue, not just play
-					playbackQueue.clear();
-					playbackQueue.add(track);
-					playTrack(track);
-				} else {
-					Toast.makeText(this, "Material has no audio: " + track, Toast.LENGTH_SHORT).show();
-				}
-			} else if(ACTION_PLAY.equals(action)) {
-				playbackStart();
-			} else if(ACTION_PAUSE.equals(action)) {
-				playbackPause();
-			} else if(ACTION_STOP.equals(action)) {
-				playbackStop();
-			} else if(ACTION_REPLAY.equals(action)) {
-				playbackRestart();
-			} else {
-				Log.w(TAG, "Unknown action: "+action);
-			}
-		} else {
-			// We were restarted by system. TODO: resume playback form stored position?
-		}
+		handleIntent(intent);
 
 		// Keep running until explicit stop
 		return START_STICKY;
@@ -133,7 +163,8 @@ public class PlayerService extends Service implements
 
 	@Override
 	public void onCompletion(MediaPlayer mp) {
-		// TODO
+		updateNotification();
+		// TODO: go to next track if needed
 	}
 
 	@Override
@@ -149,6 +180,23 @@ public class PlayerService extends Service implements
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public void onAudioFocusChange(int type) {
+		Log.d(TAG, "Audio focus change: "+type);
+		switch(type) {
+			case AudioManager.AUDIOFOCUS_LOSS:
+				playbackPause();
+				break;
+			case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+			case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+				// ignore and keep playing
+				break;
+			case AudioManager.AUDIOFOCUS_GAIN:
+				playbackStart(); // FIXME: only if was not paused by user
+				break;
+		}
 	}
 
 	/////////////////////////////////////////
@@ -180,8 +228,7 @@ public class PlayerService extends Service implements
 				new Intent(this, DanceListActivity.class), // FIXME: use PlayerActivity
 				0);
 		PendingIntent piPause = PendingIntent.getService(this, 0,
-				new Intent(mPlayer.isPlaying() ? ACTION_PAUSE : ACTION_PLAY,
-						null, this, PlayerService.class), 0);
+				new Intent(ACTION_PLAYPAUSE, null, this, PlayerService.class), 0);
 		PendingIntent piStop = PendingIntent.getService(this, 0,
 				new Intent(ACTION_STOP, null, this, PlayerService.class), 0);
 		PendingIntent piReplay = PendingIntent.getService(this, 0,
@@ -199,27 +246,39 @@ public class PlayerService extends Service implements
 		}
 		// TODO: current material's image, if present
 		Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-		Notification n = new NotificationCompat.Builder(this)
+		NotificationCompat.Builder b = new NotificationCompat.Builder(this)
 				.setContentTitle(danceName)
 				.setContentText(trackName)
 				.setContentInfo(duration)
-				.setProgress(mPlayer.getDuration(), mPlayer.getCurrentPosition(), false)
 				.setSmallIcon(R.drawable.ic_notif)
 				.setLargeIcon(largeIcon)
 				.setOngoing(true)
-				.setContentIntent(piClick)
-				.addAction(mPlayer.isPlaying() ? R.drawable.ic_action_pause : R.drawable.ic_action_play,
-						getText(mPlayer.isPlaying() ? R.string.action_pause : R.string.action_play), piPause)
-				.addAction(R.drawable.ic_action_stop, getText(R.string.action_stop), piStop)
-				.addAction(R.drawable.ic_action_replay, getText(R.string.action_replay), piReplay)
-				.build();
+				.setContentIntent(piClick);
+		if(ct != null)
+			b.setProgress(mPlayer.getDuration(), mPlayer.getCurrentPosition(), false)
+					.addAction(mPlayer.isPlaying() ? R.drawable.ic_action_pause : R.drawable.ic_action_play,
+							getText(mPlayer.isPlaying() ? R.string.action_pause : R.string.action_play), piPause)
+					.addAction(R.drawable.ic_action_stop, getText(R.string.action_stop), piStop)
+					.addAction(R.drawable.ic_action_replay, getText(R.string.action_replay), piReplay);
+		Notification n = b.build();
 
+		mNotificationUpdateHandler.removeMessages(MSG_UPDATE_NOTIFICATION);
 		if(mPlayer.isPlaying()) {
 			// schedule notification update
-			mNotificationUpdateHandler.removeMessages(MSG_UPDATE_NOTIFICATION);
 			mNotificationUpdateHandler.sendEmptyMessageDelayed(MSG_UPDATE_NOTIFICATION,
 					1050 - mPlayer.getCurrentPosition() % 1000); // update after position changes
 		}
+
+		if(mRemote != null) {
+			int state = mPlayer.isPlaying() ?
+					RemoteControlClient.PLAYSTATE_PLAYING :
+					mPlayer.getCurrentPosition() > 0 ?
+							RemoteControlClient.PLAYSTATE_PAUSED :
+							RemoteControlClient.PLAYSTATE_STOPPED;
+			updateRemotePlayState(state,
+					mPlayer.getCurrentPosition());
+		}
+		broadcastStockUpdatePlaystate();
 
 		return n;
 	}
@@ -235,39 +294,130 @@ public class PlayerService extends Service implements
 		return mp;
 	}
 
-	private void playTrack(Material track) {
+	@TargetApi(14)
+	private void registerRemote() {
+		MediaButtonsReceiver.register(this);
+
+		Intent intent = new Intent(Intent.ACTION_MEDIA_BUTTON);
+		intent.setComponent(new ComponentName(getPackageName(), MediaButtonsReceiver.class.getName()));
+		PendingIntent pi = PendingIntent.getBroadcast(this, 0, intent, 0);
+		RemoteControlClient r = new RemoteControlClient(pi);
+		r.setTransportControlFlags(RemoteControlClient.FLAG_KEY_MEDIA_NEXT
+				| RemoteControlClient.FLAG_KEY_MEDIA_PREVIOUS
+				| RemoteControlClient.FLAG_KEY_MEDIA_PAUSE
+				| RemoteControlClient.FLAG_KEY_MEDIA_PLAY
+				| RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE);
+		mAudioManager.registerRemoteControlClient(r);
+		mRemote = r;
+	}
+	@TargetApi(14)
+	private void unregisterRemote() {
+		mAudioManager.unregisterRemoteControlClient(mRemote);
+		mRemote = null;
+		MediaButtonsReceiver.unregister(this);
+	}
+
+	@TargetApi(14)
+	private void updateRemote(Material track) {
+		Log.d(TAG, "Updating media metadata with " + track);
+		RemoteControlClient.MetadataEditor e = mRemote.editMetadata(true);
+
+		e.putString(MediaMetadataRetriever.METADATA_KEY_ALBUM, track.dance.getName());
+		e.putString(MediaMetadataRetriever.METADATA_KEY_TITLE, track.name);
+		if(track.hasImage()) {
+			Bitmap b = BitmapFactory.decodeFile(track.getImageFile().getPath());
+			e.putBitmap(RemoteControlClient.MetadataEditor.BITMAP_KEY_ARTWORK, b);
+		}
+
+		e.apply();
+	}
+	@TargetApi(18)
+	private void updateRemotePlayState(int newState, long time) {
+		if(mRemote != null) {
+			if (Build.VERSION.SDK_INT >= 18)
+				mRemote.setPlaybackState(newState, time, 1);
+			else
+				mRemote.setPlaybackState(newState);
+		}
+	}
+
+	private void broadcastStockUpdateMeta(Material track) {
+		if(track == null)
+			return;
+		Intent intent = new Intent("com.android.music.metachanged");
+		intent.putExtra("playing", mPlayer.isPlaying());
+		intent.putExtra("track", track.name);
+		intent.putExtra("album", track.dance.getName());
+		intent.putExtra("duration", mPlayer.getDuration());
+		sendBroadcast(intent);
+	}
+	private void broadcastStockUpdatePlaystate() {
+		Intent intent = new Intent("com.android.music.playstatechanged");
+		intent.putExtra("playing", mPlayer.isPlaying());
+		intent.putExtra("duration", mPlayer.getDuration());
+		sendBroadcast(intent);
+	}
+
+	////////////////
+	// Operations //
+
+	public void playTrack(Material track) {
+		Log.d(TAG, "playTrack " + track);
 		try {
 			mPlayer.reset();
 			mPlayer.setDataSource(track.getAudioFile().getPath());
 			mPlayer.prepare();
+			isTrackLoaded = true;
 			playbackStart();
+			// And now update remote control info
+			if(mRemote == null) {
+				Log.w(TAG, "No remote control client registered!");
+			} else {
+				updateRemote(track);
+			}
+			broadcastStockUpdateMeta(track);
 		} catch(IOException ex) {
 			Log.e(TAG, ""+ex);
 		}
 	}
 	public void playbackStart() {
 		Log.i(TAG, "Starting playback");
+		int focusresult = mAudioManager.requestAudioFocus(this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+		if(focusresult != AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+			Toast.makeText(this, "Audio focus request failed!", Toast.LENGTH_SHORT);
+			return;
+		}
+		// ? mAudioManager.setMode(AudioManager.MODE_IN_COMMUNICATION);
+		mAudioManager.setStreamMute(AudioManager.STREAM_RING, true);
 		mPlayer.start();
+		updateNotification();
+	}
+	private void playbackHalt(boolean stop) {
+		Log.i(TAG, "Halting playback");
+		mPlayer.pause();
+		if(stop) {
+			mPlayer.seekTo(0);
+		}
+		mAudioManager.setStreamMute(AudioManager.STREAM_RING, false);
+		mAudioManager.abandonAudioFocus(this);
 		updateNotification();
 	}
 	public void playbackStop() {
-		Log.i(TAG, "Stopping playback");
-		mPlayer.pause();
-		mPlayer.seekTo(0);
-		updateNotification();
+		playbackHalt(true);
 	}
 	public void playbackPause() {
-		Log.i(TAG, "Pausing playback");
-		mPlayer.pause();
-		updateNotification();
+		playbackHalt(false);
 	}
 	public void playbackRestart() {
 		Log.i(TAG, "Restarting track");
+		boolean wasPlaying = mPlayer.isPlaying();
 		mPlayer.pause();
 		mPlayer.seekTo(0);
 		// TODO: configurable delay
-		mPlayer.start();
-		updateNotification();
+		if(wasPlaying)
+			mPlayer.start();
+		else
+			playbackStart(); // with all needed stream initializations
 	}
 
 	//////////////////////
