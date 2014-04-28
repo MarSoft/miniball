@@ -53,8 +53,11 @@ public class PlayerService extends Service {
 	}
 
 	private void showNotification() {
-		// TODO
-		PendingIntent pi = PendingIntent.getActivity(
+		PendingIntent piClick = PendingIntent.getActivity(
+				this, 0,
+				new Intent(this, DanceListActivity.class), // FIXME: use PlayerActivity
+				0);
+		PendingIntent piNext = PendingIntent.getActivity(
 				this, 0,
 				new Intent(this, DanceListActivity.class),
 				0);
@@ -64,7 +67,8 @@ public class PlayerService extends Service {
 				.setSmallIcon(R.drawable.ic_notif)
 				//.setLargeIcon(R.drawable.ic_player_large) // TODO: current material's image, if present
 				.setOngoing(true)
-				.setContentIntent(pi)
+				.setContentIntent(piClick)
+				.addAction(R.drawable.ic_action_next, null, piNext)
 				.build();
 		notificationMgr.notify(NOTIFICATION_ID, n);
 	}
