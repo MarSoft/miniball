@@ -23,15 +23,6 @@ public class PlayerService extends Service {
 		// show persistent notification
 		showNotification();
 	}
-	
-	@Override
-	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.i(TAG, "Received start id "+startId+": "+intent);
-		// TODO: handle intent, if needed
-
-		// Keep running until explicit stop
-		return START_STICKY;
-	}
 
 	@Override
 	public void onDestroy() {
@@ -42,13 +33,22 @@ public class PlayerService extends Service {
 	}
 
 	@Override
+	public int onStartCommand(Intent intent, int flags, int startId) {
+		Log.i(TAG, "Received start id "+startId+": "+intent);
+		// TODO: handle intent, if needed
+
+		// Keep running until explicit stop
+		return START_STICKY;
+	}
+
+	@Override
 	public IBinder onBind(Intent intent) {
-		// TODO
+		// We don't support binding
 		return null;
 	}
 
 	private void showNotification() {
-		// FIXME: almost copied from http://developer.android.com/reference/android/app/Service.html
+		// TODO
 		Notification n = new Notification.Builder(this)
 				.setContentTitle(getText(R.string.app_name))
 				.setContentText("Hello World")
