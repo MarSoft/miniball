@@ -7,6 +7,8 @@ import name.maryasin.miniball.data.Material;
 
 import android.app.*;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -180,12 +182,14 @@ public class PlayerService extends Service implements
 			trackName = ct.name;
 			danceName = ct.dance.getName();
 		}
+		// TODO: current material's image, if present
+		Bitmap largeIcon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
 		Notification n = new NotificationCompat.Builder(this)
 				.setContentTitle(danceName)
 				.setContentText(trackName)
-				.setContentInfo(mPlayer.isPlaying() ? "|>" : "[]")
+				//.setContentInfo(mPlayer.isPlaying() ? "|>" : "[]")
 				.setSmallIcon(R.drawable.ic_notif)
-				//.setLargeIcon(R.drawable.ic_player_large) // TODO: current material's image, if present
+				.setLargeIcon(largeIcon)
 				.setOngoing(true)
 				.setContentIntent(piClick)
 				.addAction(mPlayer.isPlaying() ? R.drawable.ic_action_pause : R.drawable.ic_action_play,
