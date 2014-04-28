@@ -90,7 +90,7 @@ public class PlayerService extends Service implements
 		// and to really remove notification created by startForeground:
 		stopForeground(true);
 
-		MediaButtonsReceiver.unregister(this);
+		unregisterRemote();
 
 		if(mPlayer != null) {
 			// TODO: save position?
@@ -297,6 +297,12 @@ public class PlayerService extends Service implements
 				| RemoteControlClient.FLAG_KEY_MEDIA_PLAY_PAUSE);
 		mAudioManager.registerRemoteControlClient(r);
 		mRemote = r;
+	}
+	@TargetApi(14)
+	private void unregisterRemote() {
+		mAudioManager.unregisterRemoteControlClient(mRemote);
+		mRemote = null;
+		MediaButtonsReceiver.unregister(this);
 	}
 
 	@TargetApi(14)
