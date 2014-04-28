@@ -133,13 +133,16 @@ public class DanceDetailFragment extends Fragment
 	public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
 		Material m = mMaterialList.get(pos);
 		Intent i = new Intent(Intent.ACTION_VIEW);
-		i.setDataAndType(Uri.fromFile(m.getAudioFile()), "audio/*");
-		startActivity(i);
+		// TODO
 	}
 
 	@Override
 	public boolean onItemLongClick(AdapterView<?> parent, View view, int pos, long id) {
-		// TODO
-		return false;
+		// Launch track in external player on long click
+		Material m = mMaterialList.get(pos);
+		Intent i = new Intent(Intent.ACTION_VIEW);
+		i.setDataAndType(Uri.fromFile(m.getAudioFile()), "audio/*");
+		startActivity(i);
+		return true;
 	}
 }
