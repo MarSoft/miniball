@@ -134,6 +134,7 @@ public class DanceDetailFragment extends Fragment
 	public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
 		Material m = mMaterialList.get(pos);
 		Intent i = new Intent(getActivity(), PlayerService.class);
+		i.setAction(PlayerService.ACTION_ENQUEUE);
 		// TODO: custom data type, with our content provider
 		i.setData(Uri.fromFile(m.getAudioFile()));
 		getActivity().startService(i);
