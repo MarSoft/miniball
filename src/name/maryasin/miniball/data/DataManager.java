@@ -132,6 +132,8 @@ public class DataManager {
 	// URI handling //
 
 	private static boolean validateUri(Uri uri) {
+		if(uri == null)
+			return false;
 		if(!uri.getScheme().equals("miniball"))
 			return false;
 		return true;
