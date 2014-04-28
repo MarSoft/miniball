@@ -175,10 +175,13 @@ public class PlayerService extends Service implements
 
 		Material ct = getCurrentTrack();
 		String trackName = "<No track loaded>";
-		if(ct != null)
+		String danceName = "<No dance loaded>";
+		if(ct != null) {
 			trackName = ct.name;
+			danceName = ct.dance.getName();
+		}
 		Notification n = new NotificationCompat.Builder(this)
-				.setContentTitle(getText(R.string.app_name))
+				.setContentTitle(danceName)
 				.setContentText(trackName)
 				.setContentInfo(mPlayer.isPlaying() ? "|>" : "[]")
 				.setSmallIcon(R.drawable.ic_notif)
