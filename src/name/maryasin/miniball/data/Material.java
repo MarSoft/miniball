@@ -3,6 +3,7 @@ package name.maryasin.miniball.data;
 import java.io.*;
 import java.util.*;
 
+import android.net.Uri;
 import android.util.Log;
 
 /**
@@ -33,6 +34,10 @@ public class Material implements Comparable<Material> {
 	}
 	public Set<String> getTags() {
 		return Collections.unmodifiableSet(tags);
+	}
+
+	public Uri getUri() {
+		return Uri.fromParts("material", dance+"/"+name, null);
 	}
 	
 	@Override

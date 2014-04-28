@@ -8,10 +8,7 @@ import android.util.Log;
 import name.maryasin.miniball.util.Settings;
 
 /**
- * Helper class for providing sample content for user interfaces created by
- * Android template wizards.
- * <p>
- * TODO: Replace all uses of this class before publishing your app.
+ * This static class manages Dances and Materials.
  */
 public class DataManager {
 	/** For logs only */
