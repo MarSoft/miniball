@@ -127,8 +127,16 @@ public class PlayerService extends Service implements
 			return;
 		}
 
+		// Process ACTION_STOP specially for the case when
+		// PlayerService got started without a track,
+		// so that user has to have ability to stop it
+		if(ACTION_STOP.equals(action)) {
+			playbackStop();
+			return;
+		}
+
 		if(!isTrackLoaded)
-			return; // ignore all these intents if no track loaded
+			return; // ignore all these intents (but Stop) if no track loaded
 
 		if(ACTION_PLAY.equals(action)) {
 			playbackStart();
@@ -139,8 +147,6 @@ public class PlayerService extends Service implements
 				playbackPause();
 			else
 				playbackStart();
-		} else if(ACTION_STOP.equals(action)) {
-			playbackStop();
 		} else if(ACTION_REPLAY.equals(action)) {
 			playbackRestart();
 		} else {
@@ -415,6 +421,8 @@ public class PlayerService extends Service implements
 			broadcastStockPlaystateCompleted();
 	}
 	public void playbackStop() {
+		Log.d(TAG, "Player: " + mPlayer + "\nPlays: " + mPlayer.isPlaying() +
+				"\npos: " + mPlayer.getCurrentPosition());
 		if(mPlayer.isPlaying() || mPlayer.getCurrentPosition() != 0) { // if playing or just paused
 			playbackHalt(true);
 		} else {
